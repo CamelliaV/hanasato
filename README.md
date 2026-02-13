@@ -1,176 +1,190 @@
 # Hanasato
 
-A local image viewer built with Electron and React, featuring a Pinterest-style waterfall layout, GPU acceleration, advanced image viewing/editing, and multi-language support.
+[简体中文](./README.zh-CN.md)
 
-![](./imgs/image_10.avif)
-![](./imgs/image_12.avif)
-![](./imgs/image_11.avif)
+Hanasato is a local-first desktop image viewer built with Electron.
 
-## Key Features
+This started as a vibe coding project and has been iterated into a practical, high-speed image workflow tool for daily use.
 
-### Core Functionality
-- **Fast Local Scanning** - Quickly scans directories and sub-directories using `fast-glob`
-- **Waterfall Layout** - Pinterest-style responsive grid with configurable column count (2-8 columns)
-- **Infinite Scrolling** - Smooth lazy loading as you scroll
-- **Multi-Tab Support** - Open multiple directories in separate tabs with persistent state
-- **Dark/Light Mode** - Toggle between themes with preference persistence
+## Screenshots
 
-### Advanced Image Viewer
-- **Full-Screen Modal** - Click any image for immersive viewing
-- **Zoom & Pan** - Mouse wheel zoom (0.5x-5x) with drag mode for panning
-- **Slideshow Mode** - Auto-advance through images with 3-second intervals
-- **Image Editing**:
-  - **Crop** - Draw selection area and save cropped region
-  - **Resize** - Custom width/height resizing
-  - **Rename/Save As** - Copy with new filename
+### Waterfall browsing
 
-### Organization
-- **Star/Favorite System** - Copy images to dedicated Starred Images folder
-- **Quick Star** - Hover-to-show star button on thumbnails (toggleable)
-- **Batch Deletion** - Multi-select mode with floating action bar
-- **Search & Filter** - Filter by filename, path, or folder name
-- **Sorting** - Sort by name, date, or size (ascending/descending)
+![Waterfall view](./imgs/屏幕截图_20260213_165555.png)
+![Waterfall and controls](./imgs/屏幕截图_20260213_165512.png)
 
-### Navigation
-- **Directory History** - Back/forward navigation with mouse button support
-- **Recently Accessed** - Persistent list of recent directories
-- **Drag & Drop** - Drop folders directly to load
-- **File Location** - Open containing folder for any image
+### Multi-tab and folder history
 
-### Customization
-- **Multi-Language Support** - English, Chinese (简体中文), Japanese (日本語)
-- **Auto Language Detection** - Defaults to system language
-- **Customizable Keybindings** - Remap all keyboard shortcuts
-- **Configurable Settings**:
-  - Click outside to close viewer
-  - Confirmation prompts
-  - Action feedback alerts
-  - Max image size (viewport width)
+![Tabs and history panel](./imgs/屏幕截图_20260213_180133.png)
+![Recent folders](./imgs/屏幕截图_20260213_180203.png)
 
-### Performance
-- **GPU Acceleration** - Hardware-accelerated rendering
-- **Zero-Copy** - Optimized image loading
-- **Image Caching** - Efficient memory management
-- **Lazy Loading** - Load images on demand
+### Full-screen viewer and gallery tools
 
-## Keyboard Shortcuts
+![Viewer and gallery](./imgs/屏幕截图_20260213_165722.png)
+![Image operations](./imgs/屏幕截图_20260213_165715.png)
 
-### Image Viewer
-| Key | Action |
-|-----|--------|
-| `←` / `→` | Previous / Next image |
-| `+` / `-` | Zoom in / out |
-| `0` | Reset zoom |
-| `d` | Toggle drag mode (when zoomed) |
-| `Space` | Toggle slideshow |
-| `Delete` | Delete image |
-| `s` | Star/Unstar image |
-| `c` | Copy to clipboard |
-| `l` | Open file location |
-| `x` | Crop mode |
-| `r` | Resize mode |
-| `Escape` | Close viewer |
+## Feature Overview
 
-### Main Window
-| Key | Action |
-|-----|--------|
-| `Ctrl+O` | Open directory |
-| `Ctrl+T` | New tab |
-| `Ctrl+W` | Close tab |
-| `f` | View favorites |
-| `Delete` | Toggle delete mode |
-| `m` | Toggle dark mode |
-| `h` | Toggle history panel |
-| `,` | Open settings |
-| `?` | Open help |
+### Library browsing
+- Recursive folder scan with `fast-glob`
+- Waterfall grid with adjustable columns (2-8)
+- Infinite scroll loading for large libraries
+- Search by filename/path/folder
+- Sorting by name/date/size (ascending/descending)
 
-## Technology Stack
+### Navigation and organization
+- Multi-tab browsing with per-tab state
+- Back/forward folder history
+- Persistent recent folders
+- Drag-and-drop folder loading
+- Favorites system (`Starred Images` under your Pictures directory)
+- Batch selection and recycle-bin deletion
 
-- **[Electron](https://www.electronjs.org/)** - Cross-platform desktop framework
-- **[React 18](https://reactjs.org/)** - UI library
-- **[Tailwind CSS](https://tailwindcss.com/)** - Utility-first styling
-- **[fast-glob](https://github.com/mrmlnc/fast-glob)** - High-performance file scanning
-- **[Electron Forge](https://www.electronforge.io/)** - Build and packaging
+### Viewer and editing
+- Full-screen modal viewer
+- Zoom (0.5x-5x), pan/drag mode, slideshow
+- Copy image to clipboard
+- Open file location from viewer
+- Crop and resize tools (saved as new files)
+- Rename via copy-with-new-name behavior
 
-## Getting Started
+### Mosaic mode
+- Dedicated mosaic/wall mode for rapid visual review
+- Adjustable images-per-wall or tile-size controls
+- Multiple animation modes and loop navigation
 
-### Prerequisites
+### Customization and i18n
+- Multiple built-in themes
+- Custom keybindings
+- Behavior toggles (confirm prompts, click-outside-to-close, action feedback)
+- Localized UI: `en`, `zh-CN`, `ja`
 
-- [Node.js](https://nodejs.org/) (v16 or higher)
-- npm or yarn
+## Installation
 
-### Installation
+### Windows (from source)
+
+Prerequisites:
+- Node.js 16+
+- npm
+
+Steps:
 
 ```bash
-# Clone the repository
-git clone https://github.com/CamelliaV/hanasato.git
-
-# Navigate to project directory
-cd hanasato
-
-# Install dependencies
+git clone https://github.com/CamelliaV/local-image-viewer.git
+cd local-image-viewer
 npm install
-```
-
-### Running
-
-```bash
-# Development mode (with DevTools)
-npm run dev
-
-# Production mode
 npm start
 ```
 
-### Building
+Build distributables:
 
 ```bash
-# Create distributable package
-npm run make
-
-# Package without creating installer
 npm run package
+npm run make
 ```
 
-### Platform-Specific Packages
+### Linux (from source)
 
-The build system supports:
-- **Windows** - Squirrel installer (.exe)
-- **macOS** - ZIP archive
-- **Linux** - DEB, RPM, and ZIP packages
+Prerequisites:
+- Node.js 16+
+- npm
 
-#### Arch Linux
+Steps:
 
 ```bash
-# Build and install from PKGBUILD
+git clone https://github.com/CamelliaV/local-image-viewer.git
+cd local-image-viewer
+npm install
+npm start
+```
+
+Build distributables:
+
+```bash
+npm run make:linux
+npm run make:deb
+npm run make:rpm
+npm run make:zip
+```
+
+### Arch Linux
+
+A `PKGBUILD` is included in the repository:
+
+```bash
 makepkg -si
 ```
 
-## Architecture
+## Default Shortcuts
 
+All shortcuts are user-configurable in Settings.
+
+### Main window
+
+| Key | Action |
+| --- | --- |
+| `Ctrl/Cmd + O` | Open directory |
+| `Ctrl/Cmd + T` | New tab |
+| `Ctrl/Cmd + W` | Close tab |
+| `F` | View favorites |
+| `Backspace` | Toggle delete mode |
+| `H` | Toggle history panel |
+| `G` | Toggle mosaic mode |
+| `,` | Open settings |
+| `?` | Open help |
+
+### Image viewer
+
+| Key | Action |
+| --- | --- |
+| `ArrowLeft` / `ArrowRight` | Previous / next image |
+| `+` / `-` | Zoom in / out |
+| `0` | Reset zoom |
+| `D` | Toggle drag mode |
+| `Space` | Toggle slideshow |
+| `Delete` | Delete image |
+| `S` | Star / unstar image |
+| `Y` | Copy to clipboard |
+| `L` | Open file location |
+| `X` | Toggle crop mode |
+| `R` | Toggle resize mode |
+| `C` | Toggle metadata drawer |
+| `Escape` | Close viewer |
+
+## Tech Stack
+
+- Electron 25
+- React 18 (CDN runtime in renderer)
+- Tailwind CSS (CDN)
+- fast-glob
+- Electron Forge
+
+## Project Structure
+
+```text
+.
+├── main.js              # Electron main process (window, IPC, protocol)
+├── preload.js           # Secure renderer API via contextBridge
+├── renderer/index.html  # React UI (single-file renderer)
+├── locales/             # i18n resources (en, zh-CN, ja)
+├── assets/              # Icons and desktop entry
+├── forge.config.js      # Packaging and fuses config
+├── imgs/                # README screenshots
+├── README.md            # English README
+└── README.zh-CN.md      # Chinese README
 ```
-├── main.js           # Electron main process
-├── preload.js        # Secure IPC bridge (contextBridge)
-├── renderer/
-│   └── index.html    # React single-page application
-├── locales/          # i18n translation files
-│   ├── en.json
-│   ├── zh-CN.json
-│   └── ja.json
-└── assets/           # Icons and desktop entry
-```
 
-### Security
+## Security Notes
 
-- **Context Isolation** - Renderer process isolated from Node.js
-- **Custom Protocol** - `local-image://` protocol for secure local file access
-- **No Remote Content** - All resources loaded locally
-- **ASAR Integrity** - Packaged with integrity validation
+- `nodeIntegration` is disabled in the renderer
+- `contextIsolation` is enabled with a narrow preload API
+- Local files are served via a custom `local-image://` protocol
+- Electron fuses are configured for stricter production behavior
 
-## Supported Formats
+## Supported Image Formats
 
-Images: `jpg`, `jpeg`, `png`, `gif`, `bmp`, `webp`, `avif`, `svg`, `ico`, `tiff`, `tif`
+`jpg`, `jpeg`, `png`, `gif`, `bmp`, `webp`, `svg`, `tiff`, `tif`, `avif`, `heic`, `heif`, `ico`
 
 ## License
 
-MIT License
+MIT
