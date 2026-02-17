@@ -36,6 +36,8 @@
     "selectDirectoryToStart": "Select a directory to get started.",
     "noMatchesFound": "No Matches Found",
     "tryAdjustingSearch": "Try adjusting your search term.",
+    "videosHiddenBySettings": "Videos are hidden by settings",
+    "enableVideosHint": "Enable video support in Settings to show and play videos.",
     "searchPlaceholder": "Search images...",
     "allImagesLoaded": "All {count} images loaded!",
     "loadingMore": "Loading more...",
@@ -61,6 +63,8 @@
     "crop": "Crop",
     "resize": "Resize",
     "rename": "Rename",
+    "videoCodecNotSupported": "This video codec is not supported by the embedded player.",
+    "openInExternalPlayer": "Open in external player",
     "modified": "Modified",
     "of": "of",
     "showMetadata": "Show metadata",
@@ -99,6 +103,7 @@
     "clickOutsideToClose": "Click outside to close viewer",
     "confirmationPrompts": "Confirmation prompts",
     "showActionFeedback": "Show action feedback (alerts)",
+    "enableVideos": "Enable video support",
     "maxImageSize": "Max image size (vw)",
     "retainImages": "Retain loaded images (smoother scroll)",
     "performanceMode": "Performance mode (aggressive preloading)",
@@ -149,7 +154,8 @@
     "mosaicNextWall": "Mosaic: Next Wall",
     "mosaicPrevWall": "Mosaic: Previous Wall",
     "mosaicResetTileScale": "Mosaic: Reset Tile Scale",
-    "mosaicToggleDrawer": "Mosaic: Toggle Controls"
+    "mosaicToggleDrawer": "Mosaic: Toggle Controls",
+    "toggleAppMenu": "Toggle App Menu"
   },
   "prompts": {
     "enterNewFilename": "Enter new filename:",
@@ -193,5 +199,38 @@
     "loaded": "loaded",
     "fixedGrid": "Fixed Grid",
     "adaptiveGrid": "Adaptive"
+  },
+  "menu": {
+    "showAppMenu": "Show app menu",
+    "hideAppMenu": "Hide app menu",
+    "toggleAppMenu": "Toggle app menu",
+    "dragOrClickMenuOrb": "Drag to move, click to open quick actions"
+  },
+  "command": {
+    "title": "Command palette",
+    "openPalette": "Open command palette",
+    "typePlaceholder": "Type a command...",
+    "hint": "Enter: run • ↑/↓: navigate • Esc: close",
+    "noMatches": "No matching commands.",
+    "openDirectory": "Open directory",
+    "newTab": "New tab",
+    "openFavorites": "Open favorites",
+    "showHistoryPanel": "Show history panel",
+    "hideHistoryPanel": "Hide history panel",
+    "openMosaicMode": "Open mosaic mode",
+    "closeMosaicMode": "Close mosaic mode",
+    "enableDeleteMode": "Enable delete mode",
+    "disableDeleteMode": "Disable delete mode",
+    "openSettings": "Open settings",
+    "openKeyboardHelp": "Open keyboard help",
+    "toggleTheme": "Toggle dark/light theme",
+    "showFilters": "Show filters",
+    "hideFilters": "Hide filters",
+    "clearFilters": "Clear all filters",
+    "filterAllMedia": "Filter media: all",
+    "filterImagesOnly": "Filter media: images only",
+    "filterVideosOnly": "Filter media: videos only",
+    "filterLast7Days": "Filter date: last 7 days",
+    "filterLargeFiles": "Filter size: large files"
   }
 }

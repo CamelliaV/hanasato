@@ -8,6 +8,8 @@
   "license": "MIT",
   "scripts": {
     "start": "electron-forge start",
+    "start:installed": "HANASATO_USER_DATA_DIR=$HOME/.config/Hanasato electron-forge start",
+    "start:legacy-profile": "HANASATO_USER_DATA_DIR=$HOME/.config/local-image-viewer electron-forge start",
     "dev": "electron . --dev",
     "package": "electron-forge package",
     "make": "electron-forge make",
@@ -25,7 +27,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.8.3",
     "@electron-forge/plugin-fuses": "^7.8.3",
     "@electron/fuses": "^1.8.0",
-    "electron": "^25.9.0"
+    "electron": "^40.4.1"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",

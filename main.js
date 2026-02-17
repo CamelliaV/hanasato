@@ -11,10 +11,74 @@ const {
   nativeImage
 } = require('electron')
 const path = require('path')
+const os = require('os')
+const crypto = require('crypto')
 const fs = require('fs').promises
 const fsSync = require('fs')
+const { execFile } = require('child_process')
 const fastGlob = require('fast-glob')
 const { pathToFileURL, fileURLToPath } = require('url')
+
+// Keep dev and packaged builds on the same persistent profile path.
+const PERSISTENT_PROFILE_DIR = 'Hanasato'
+const LEGACY_PROFILE_DIRS = ['hanasato', 'local-image-viewer']
+const LEGACY_DATA_HOME_DIRS = ['Hanasato', 'hanasato', 'local-image-viewer']
+const FORCED_USER_DATA_PATH = process.env.HANASATO_USER_DATA_DIR
+
+function hasPersistentState(dirPath) {
+  try {
+    const localStorageDir = path.join(dirPath, 'Local Storage', 'leveldb')
+    if (fsSync.existsSync(localStorageDir)) {
+      const entries = fsSync.readdirSync(localStorageDir)
+      if (entries.length > 0) return true
+    }
+    return fsSync.existsSync(path.join(dirPath, 'Preferences'))
+  } catch (error) {
+    return false
+  }
+}
+
+function migrateLegacyProfileIfNeeded(preferredPath) {
+  if (fsSync.existsSync(preferredPath)) return
+
+  const appDataRoot = app.getPath('appData')
+  const dataHome =
+    process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share')
+  const candidates = [
+    ...LEGACY_PROFILE_DIRS.map(dirName => path.join(appDataRoot, dirName)),
+    ...LEGACY_DATA_HOME_DIRS.map(dirName => path.join(dataHome, dirName))
+  ]
+  const source = candidates.find(hasPersistentState)
+  if (!source) return
+
+  try {
+    fsSync.cpSync(source, preferredPath, {
+      recursive: true,
+      errorOnExist: false,
+      force: false
+    })
+  } catch (error) {
+    console.warn('Legacy profile migration failed:', error.message)
+  }
+}
+
+const preferredUserDataPath = path.join(app.getPath('appData'), PERSISTENT_PROFILE_DIR)
+if (FORCED_USER_DATA_PATH) {
+  const resolvedUserDataPath = path.resolve(FORCED_USER_DATA_PATH)
+  fsSync.mkdirSync(resolvedUserDataPath, { recursive: true })
+  app.setPath('userData', resolvedUserDataPath)
+} else {
+  migrateLegacyProfileIfNeeded(preferredUserDataPath)
+  app.setPath('userData', preferredUserDataPath)
+}
+
+console.log(
+  '[startup] name=%s packaged=%s userData=%s',
+  app.getName(),
+  app.isPackaged ? 'yes' : 'no',
+  app.getPath('userData')
+)
+console.log('[thumb-cache] dir=%s', path.join(app.getPath('userData'), 'thumb-cache'))
 
 let mainWindow
 
@@ -38,7 +102,8 @@ app.commandLine.appendSwitch('enable-features', [
 app.commandLine.appendSwitch('disable-features', [
   'UseChromeOSDirectVideoDecoder', // Not needed on Linux
   'CalculateNativeWinOcclusion',   // Windows-only
-  'MediaFoundationVideoCapture'    // Windows-only
+  'MediaFoundationVideoCapture',   // Windows-only
+  'Vulkan'                         // Wayland + Vulkan is noisy/unstable in Electron
 ].join(','))
 
 // Memory optimizations for large galleries
@@ -56,6 +121,377 @@ if (process.env.XDG_SESSION_TYPE === 'wayland') {
 // Cache for starred status checks
 const starredCache = new Map()
 let starredCacheDir = null
+const videoThumbnailCache = new Map()
+const videoInfoCache = new Map()
+const VIDEO_CACHE_VERSION = 'v2'
+const IMAGE_THUMBNAIL_CACHE_VERSION = 'v1'
+const DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE = 384
+const LEGACY_IMAGE_THUMBNAIL_MAX_SIDE = 640
+const IMAGE_THUMBNAIL_MAX_CONCURRENCY = 1
+const imageThumbnailUrlCache = new Map()
+const imageThumbnailInFlight = new Map()
+const imageThumbnailCacheDir = path.join(app.getPath('userData'), 'thumb-cache')
+const imageThumbnailQueue = []
+let imageThumbnailActive = 0
+const imageThumbnailStats = {
+  requests: 0,
+  memoryHits: 0,
+  diskHits: 0,
+  generated: 0,
+  ffmpegGenerated: 0,
+  fallbackGenerated: 0,
+  failed: 0
+}
+
+function logImageThumbnailStats(reason = '') {
+  const suffix = reason ? ` reason=${reason}` : ''
+  console.log(
+    '[thumb-stats]%s req=%d mem=%d disk=%d gen=%d ffmpeg=%d fallback=%d fail=%d',
+    suffix,
+    imageThumbnailStats.requests,
+    imageThumbnailStats.memoryHits,
+    imageThumbnailStats.diskHits,
+    imageThumbnailStats.generated,
+    imageThumbnailStats.ffmpegGenerated,
+    imageThumbnailStats.fallbackGenerated,
+    imageThumbnailStats.failed
+  )
+}
+
+function getVideoCacheKey(filePath) {
+  const normalizedPath = path.normalize(filePath)
+  try {
+    const stats = fsSync.statSync(normalizedPath)
+    return `${VIDEO_CACHE_VERSION}::${normalizedPath}::${stats.size}::${Math.floor(stats.mtimeMs)}`
+  } catch (error) {
+    return `${VIDEO_CACHE_VERSION}::${normalizedPath}::missing`
+  }
+}
+
+function getImageThumbnailCacheKey(filePath, maxSide = DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE) {
+  const normalizedPath = path.normalize(filePath)
+  try {
+    const stats = fsSync.statSync(normalizedPath)
+    return `${IMAGE_THUMBNAIL_CACHE_VERSION}::${normalizedPath}::${stats.size}::${Math.floor(stats.mtimeMs)}::${maxSide}`
+  } catch (error) {
+    return `${IMAGE_THUMBNAIL_CACHE_VERSION}::${normalizedPath}::missing::${maxSide}`
+  }
+}
+
+function toLocalImageUrl(filePath) {
+  return pathToFileURL(filePath).href.replace('file://', 'local-image://')
+}
+
+function getImageThumbnailCacheFilePath(filePath, maxSide = DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE) {
+  const cacheKey = getImageThumbnailCacheKey(filePath, maxSide)
+  const fileHash = crypto
+    .createHash('sha1')
+    .update(cacheKey)
+    .digest('hex')
+  return path.join(imageThumbnailCacheDir, `${fileHash}.jpg`)
+}
+
+function getCachedImageThumbnailUrl(filePath, maxSide = DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE) {
+  try {
+    const thumbnailPath = getImageThumbnailCacheFilePath(filePath, maxSide)
+    if (fsSync.existsSync(thumbnailPath)) {
+      return toLocalImageUrl(thumbnailPath)
+    }
+    if (maxSide !== LEGACY_IMAGE_THUMBNAIL_MAX_SIDE) {
+      const legacyPath = getImageThumbnailCacheFilePath(filePath, LEGACY_IMAGE_THUMBNAIL_MAX_SIDE)
+      if (fsSync.existsSync(legacyPath)) {
+        return toLocalImageUrl(legacyPath)
+      }
+    }
+    return null
+  } catch (error) {
+    return null
+  }
+}
+
+function processImageThumbnailQueue() {
+  while (imageThumbnailActive < IMAGE_THUMBNAIL_MAX_CONCURRENCY && imageThumbnailQueue.length > 0) {
+    const next = imageThumbnailQueue.shift()
+    if (!next) break
+    imageThumbnailActive += 1
+    ;(async () => {
+      let result = null
+      try {
+        result = await next.task()
+      } catch (error) {
+        result = null
+      } finally {
+        next.resolve(result)
+        imageThumbnailActive = Math.max(0, imageThumbnailActive - 1)
+        processImageThumbnailQueue()
+      }
+    })()
+  }
+}
+
+function enqueueImageThumbnailTask(task) {
+  return new Promise(resolve => {
+    imageThumbnailQueue.push({ task, resolve })
+    processImageThumbnailQueue()
+  })
+}
+
+async function generateImageThumbnailWithFfmpeg(inputPath, outputPath, maxSide) {
+  try {
+    await execFileBuffer(
+      'ffmpeg',
+      [
+        '-v', 'error',
+        '-y',
+        '-i', inputPath,
+        '-vf', `scale=${maxSide}:${maxSide}:force_original_aspect_ratio=decrease`,
+        '-frames:v', '1',
+        '-q:v', '5',
+        outputPath
+      ],
+      { timeout: 12000 }
+    )
+    const stat = fsSync.statSync(outputPath)
+    return stat.size > 0
+  } catch (error) {
+    return false
+  }
+}
+
+async function getImageThumbnail(filePath, maxSide = DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE) {
+  const normalizedPath = path.normalize(filePath)
+  imageThumbnailStats.requests += 1
+  const safeMaxSide = Number.isFinite(maxSide)
+    ? Math.max(128, Math.min(1024, Math.floor(maxSide)))
+    : DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE
+  const cacheKey = getImageThumbnailCacheKey(normalizedPath, safeMaxSide)
+  if (imageThumbnailUrlCache.has(cacheKey)) {
+    imageThumbnailStats.memoryHits += 1
+    return imageThumbnailUrlCache.get(cacheKey)
+  }
+  const cachedUrl = getCachedImageThumbnailUrl(normalizedPath, safeMaxSide)
+  if (cachedUrl) {
+    imageThumbnailStats.diskHits += 1
+    imageThumbnailUrlCache.set(cacheKey, cachedUrl)
+    return cachedUrl
+  }
+
+  if (imageThumbnailInFlight.has(cacheKey)) {
+    return imageThumbnailInFlight.get(cacheKey)
+  }
+
+  const task = (async () => {
+    try {
+      await fs.mkdir(imageThumbnailCacheDir, { recursive: true })
+      const thumbnailPath = getImageThumbnailCacheFilePath(normalizedPath, safeMaxSide)
+
+      if (!fsSync.existsSync(thumbnailPath)) {
+        const generated = await enqueueImageThumbnailTask(async () => {
+          let mode = ''
+          let jpgBuffer = null
+
+          const ffmpegOk = await generateImageThumbnailWithFfmpeg(
+            normalizedPath,
+            thumbnailPath,
+            safeMaxSide
+          )
+          if (ffmpegOk) {
+            return { ok: true, mode: 'ffmpeg' }
+          }
+
+          try {
+            const thumb = await nativeImage.createThumbnailFromPath(normalizedPath, {
+              width: safeMaxSide,
+              height: safeMaxSide
+            })
+            if (thumb && !thumb.isEmpty()) {
+              const encoded = thumb.toJPEG(78)
+              if (encoded && encoded.length > 0) {
+                jpgBuffer = encoded
+                mode = 'thumb-api'
+              }
+            }
+          } catch (error) {}
+
+          if (!jpgBuffer) {
+            try {
+              const sourceImage = nativeImage.createFromPath(normalizedPath)
+              if (sourceImage && !sourceImage.isEmpty()) {
+                const sourceSize = sourceImage.getSize()
+                const srcW = Math.max(1, Number(sourceSize.width) || 1)
+                const srcH = Math.max(1, Number(sourceSize.height) || 1)
+                const scale = Math.min(1, safeMaxSide / Math.max(srcW, srcH))
+                const targetW = Math.max(1, Math.round(srcW * scale))
+                const targetH = Math.max(1, Math.round(srcH * scale))
+                const resized = sourceImage.resize({
+                  width: targetW,
+                  height: targetH,
+                  quality: 'good'
+                })
+                if (resized && !resized.isEmpty()) {
+                  const encoded = resized.toJPEG(76)
+                  if (encoded && encoded.length > 0) {
+                    jpgBuffer = encoded
+                    mode = 'resize-fallback'
+                  }
+                }
+              }
+            } catch (error) {}
+          }
+
+          if (!jpgBuffer) {
+            return { ok: false, mode: '' }
+          }
+          await fs.writeFile(thumbnailPath, jpgBuffer)
+          return { ok: true, mode }
+        })
+        if (!generated?.ok) {
+          imageThumbnailStats.failed += 1
+          if (imageThumbnailStats.failed % 10 === 0) {
+            logImageThumbnailStats('generation-failed')
+          }
+          return null
+        }
+        if (generated.mode === 'resize-fallback') {
+          imageThumbnailStats.fallbackGenerated += 1
+        } else if (generated.mode === 'ffmpeg') {
+          imageThumbnailStats.ffmpegGenerated += 1
+        } else {
+          imageThumbnailStats.generated += 1
+        }
+        if (
+          (
+            imageThumbnailStats.generated +
+            imageThumbnailStats.ffmpegGenerated +
+            imageThumbnailStats.fallbackGenerated
+          ) % 20 === 0
+        ) {
+          logImageThumbnailStats('generated')
+        }
+      }
+
+      const thumbUrl = toLocalImageUrl(thumbnailPath)
+      imageThumbnailUrlCache.set(cacheKey, thumbUrl)
+      return thumbUrl
+    } catch (error) {
+      return null
+    } finally {
+      imageThumbnailInFlight.delete(cacheKey)
+    }
+  })()
+
+  imageThumbnailInFlight.set(cacheKey, task)
+  return task
+}
+
+function execFileBuffer(command, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    execFile(
+      command,
+      args,
+      {
+        ...options,
+        encoding: 'buffer',
+        maxBuffer: 32 * 1024 * 1024
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          error.stderr = stderr ? stderr.toString() : ''
+          reject(error)
+          return
+        }
+        resolve({ stdout, stderr })
+      }
+    )
+  })
+}
+
+async function readVideoInfo(filePath) {
+  const normalizedPath = path.normalize(filePath)
+  const cacheKey = getVideoCacheKey(normalizedPath)
+  if (videoInfoCache.has(cacheKey)) {
+    return videoInfoCache.get(cacheKey)
+  }
+
+  try {
+    const { stdout } = await execFileBuffer('ffprobe', [
+      '-v', 'error',
+      '-select_streams', 'v:0',
+      '-show_entries', 'stream=codec_name,width,height',
+      '-show_entries', 'format=duration',
+      '-of', 'json',
+      normalizedPath
+    ])
+    const parsed = JSON.parse(stdout.toString('utf8'))
+    const stream = parsed?.streams?.[0] || {}
+    const format = parsed?.format || {}
+    const info = {
+      codecName: stream.codec_name || '',
+      width: Number(stream.width) || 0,
+      height: Number(stream.height) || 0,
+      duration: Number(format.duration) || 0
+    }
+    videoInfoCache.set(cacheKey, info)
+    return info
+  } catch (error) {
+    return null
+  }
+}
+
+async function extractVideoThumbnail(filePath) {
+  const normalizedPath = path.normalize(filePath)
+  const cacheKey = getVideoCacheKey(normalizedPath)
+  if (videoThumbnailCache.has(cacheKey)) {
+    return videoThumbnailCache.get(cacheKey)
+  }
+
+  const run = async args => {
+    const { stdout } = await execFileBuffer('ffmpeg', args)
+    if (!stdout || stdout.length === 0) {
+      throw new Error('No thumbnail data produced')
+    }
+    return `data:image/jpeg;base64,${stdout.toString('base64')}`
+  }
+
+  try {
+    const thumb = await run([
+      '-hide_banner',
+      '-loglevel', 'error',
+      '-i', normalizedPath,
+      '-map', '0:v:0',
+      '-an',
+      '-sn',
+      '-frames:v', '1',
+      '-vf', 'thumbnail=120,scale=480:-1:force_original_aspect_ratio=decrease',
+      '-f', 'image2pipe',
+      '-vcodec', 'mjpeg',
+      'pipe:1'
+    ])
+    videoThumbnailCache.set(cacheKey, thumb)
+    return thumb
+  } catch (error) {
+    try {
+      const thumb = await run([
+        '-hide_banner',
+        '-loglevel', 'error',
+        '-ss', '00:00:01',
+        '-i', normalizedPath,
+        '-map', '0:v:0',
+        '-an',
+        '-sn',
+        '-frames:v', '1',
+        '-vf', 'scale=480:-1:force_original_aspect_ratio=decrease',
+        '-f', 'image2pipe',
+        '-vcodec', 'mjpeg',
+        'pipe:1'
+      ])
+      videoThumbnailCache.set(cacheKey, thumb)
+      return thumb
+    } catch (fallbackError) {
+      return null
+    }
+  }
+}
 
 async function movePathsToTrash(paths) {
   const targets = Array.isArray(paths) ? paths : [paths]
@@ -214,8 +650,9 @@ ipcMain.handle('get-images', async (event, dirPath) => {
     if (!fsSync.existsSync(normalizedDirPath)) {
       throw new Error('Directory does not exist')
     }
-    const imageExtensions = ['**/*.{jpg,jpeg,png,gif,bmp,webp,svg,tiff,tif,avif,heic,heif,ico}']
-    const files = await fastGlob(imageExtensions, {
+    const mediaExtensions = ['**/*.{jpg,jpeg,png,gif,bmp,webp,svg,tiff,tif,avif,heic,heif,ico,mp4,m4v,mov,webm,mkv,avi,wmv,flv,mpeg,mpg}']
+    const videoExtSet = new Set(['.mp4', '.m4v', '.mov', '.webm', '.mkv', '.avi', '.wmv', '.flv', '.mpeg', '.mpg'])
+    const files = await fastGlob(mediaExtensions, {
       cwd: normalizedDirPath,
       absolute: true,
       caseSensitiveMatch: false,
@@ -227,6 +664,7 @@ ipcMain.handle('get-images', async (event, dirPath) => {
     // Process files in batches for better performance
     const BATCH_SIZE = 100
     const images = []
+    let cachedThumbCount = 0
 
     for (let i = 0; i < files.length; i += BATCH_SIZE) {
       const batch = files.slice(i, i + BATCH_SIZE)
@@ -238,6 +676,13 @@ ipcMain.handle('get-images', async (event, dirPath) => {
             const relativePath = path.relative(normalizedDirPath, filePath)
             const fileUrl = pathToFileURL(filePath).href
             const customUrl = fileUrl.replace('file://', 'local-image://')
+            const extension = path.extname(filePath).toLowerCase()
+            const mediaType = videoExtSet.has(extension) ? 'video' : 'image'
+            const thumbnailUrl =
+              mediaType === 'image'
+                ? getCachedImageThumbnailUrl(filePath, DEFAULT_IMAGE_THUMBNAIL_MAX_SIDE)
+                : null
+            if (thumbnailUrl) cachedThumbCount += 1
 
             return {
               name: path.basename(filePath),
@@ -246,7 +691,9 @@ ipcMain.handle('get-images', async (event, dirPath) => {
               size: stats.size,
               lastModified: stats.mtime.getTime(),
               directory: path.dirname(relativePath) === '.' ? 'Root' : path.dirname(relativePath),
-              url: customUrl
+              url: customUrl,
+              thumbnailUrl,
+              mediaType
             }
           } catch (error) {
             return null
@@ -255,11 +702,41 @@ ipcMain.handle('get-images', async (event, dirPath) => {
       )
       images.push(...batchResults.filter(img => img !== null))
     }
+    console.log(
+      '[get-images] dir=%s total=%d cachedThumbs=%d',
+      normalizedDirPath,
+      images.length,
+      cachedThumbCount
+    )
 
     return images.sort((a, b) => a.name.localeCompare(b.name))
   } catch (error) {
     console.error('Get images error:', error)
     throw new Error(`Failed to scan directory: ${error.message}`)
+  }
+})
+
+ipcMain.handle('get-video-info', async (event, filePath) => {
+  try {
+    return await readVideoInfo(filePath)
+  } catch (error) {
+    return null
+  }
+})
+
+ipcMain.handle('get-video-thumbnail', async (event, filePath) => {
+  try {
+    return await extractVideoThumbnail(filePath)
+  } catch (error) {
+    return null
+  }
+})
+
+ipcMain.handle('get-image-thumbnail', async (event, filePath, maxSide) => {
+  try {
+    return await getImageThumbnail(filePath, maxSide)
+  } catch (error) {
+    return null
   }
 })
 
@@ -293,6 +770,20 @@ ipcMain.handle('open-file-location', async (event, filePath) => {
       return true
     }
     throw new Error(`Failed to open file location: ${error.message}`)
+  }
+})
+
+ipcMain.handle('open-file', async (event, filePath) => {
+  try {
+    const normalizedPath = path.normalize(filePath)
+    if (!fsSync.existsSync(normalizedPath)) {
+      throw new Error('File does not exist')
+    }
+    await shell.openPath(normalizedPath)
+    return true
+  } catch (error) {
+    console.error('Open file error:', error)
+    throw new Error(`Failed to open file: ${error.message}`)
   }
 })
 

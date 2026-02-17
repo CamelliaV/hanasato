@@ -8,81 +8,161 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet" />
     <style>
+      :root {
+        --hana-accent: #38bdf8;
+        --hana-accent-2: #22d3ee;
+        --hana-surface: rgba(8, 14, 26, 0.58);
+        --hana-surface-soft: rgba(15, 23, 42, 0.44);
+        --hana-border: rgba(148, 163, 184, 0.26);
+        --hana-shadow: 0 20px 50px rgba(3, 7, 18, 0.35);
+      }
+      * {
+        box-sizing: border-box;
+      }
       body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-          sans-serif;
+        font-family: 'Manrope', 'Noto Sans', 'Noto Sans CJK SC', 'PingFang SC', sans-serif;
+        background:
+          radial-gradient(90rem 45rem at -10% -10%, rgba(56, 189, 248, 0.12), transparent 55%),
+          radial-gradient(85rem 40rem at 110% -10%, rgba(34, 211, 238, 0.12), transparent 52%),
+          linear-gradient(180deg, #0b1220 0%, #101726 100%);
+        color: #f8fafc;
       }
       .app-container {
         height: 100vh;
         overflow-y: auto;
         overflow-x: hidden;
+        position: relative;
+        isolation: isolate;
+      }
+      .app-container::before {
+        content: '';
+        position: fixed;
+        inset: -30% -10% auto -10%;
+        height: 80vh;
+        pointer-events: none;
+        z-index: -1;
+        background:
+          radial-gradient(closest-side, rgba(56, 189, 248, 0.16), transparent 70%),
+          radial-gradient(closest-side, rgba(14, 116, 144, 0.14), transparent 72%);
+        filter: blur(40px);
+        transform: rotate(-8deg);
       }
       .app-container::-webkit-scrollbar {
-        width: 8px;
+        width: 10px;
       }
       .app-container::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        background: rgba(15, 23, 42, 0.5);
       }
       .app-container::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
+        background: linear-gradient(180deg, #334155, #1e293b);
+        border: 2px solid rgba(2, 6, 23, 0.72);
+        border-radius: 999px;
       }
       .app-container::-webkit-scrollbar-thumb:hover {
-        background: #555;
+        background: linear-gradient(180deg, #475569, #334155);
+      }
+      .hana-header {
+        border-color: var(--hana-border) !important;
+        background: linear-gradient(180deg, rgba(2, 6, 23, 0.72), rgba(2, 6, 23, 0.48));
+        box-shadow: 0 14px 34px rgba(2, 6, 23, 0.3);
+      }
+      .hana-tab-strip {
+        border-color: rgba(148, 163, 184, 0.2) !important;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.42), rgba(15, 23, 42, 0.2));
+      }
+      .hana-tab-strip > div,
+      .hana-tab-strip > button {
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-bottom-color: rgba(148, 163, 184, 0.28);
+        box-shadow: 0 8px 18px rgba(2, 6, 23, 0.18);
+      }
+      .hana-toolbar input,
+      .hana-toolbar select,
+      .hana-toolbar button {
+        backdrop-filter: blur(6px);
+      }
+      .hana-toolbar select,
+      .hana-toolbar input {
+        border-radius: 12px;
+      }
+      .hana-toolbar h1 {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        text-shadow: 0 8px 24px rgba(14, 165, 233, 0.2);
+      }
+      .hana-toolbar .font-medium {
+        letter-spacing: -0.01em;
       }
       .waterfall-container {
         display: flex;
-        gap: 12px;
-        padding: 16px;
+        gap: 14px;
+        padding: 18px;
+        width: min(1500px, 100%);
+        margin: 0 auto;
         align-items: flex-start;
         overflow-x: auto;
       }
       .waterfall-column {
-        flex: 1 0 180px;
-        min-width: 180px;
+        flex: 1 0 185px;
+        min-width: 185px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 14px;
       }
       .image-card {
-        border-radius: 12px;
+        border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        background: linear-gradient(170deg, rgba(15, 23, 42, 0.62), rgba(15, 23, 42, 0.45));
+        box-shadow: var(--hana-shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         cursor: pointer;
         position: relative;
         display: flex;
         flex-direction: column;
+        backdrop-filter: blur(8px) saturate(1.1);
       }
       .image-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-4px) scale(1.005);
+        border-color: rgba(56, 189, 248, 0.45);
+        box-shadow:
+          0 28px 48px rgba(2, 6, 23, 0.44),
+          0 0 0 1px rgba(56, 189, 248, 0.22);
       }
-      .image-card img {
+      .image-card img,
+      .image-card video {
         width: 100%;
         height: auto;
         max-height: 400px;
         object-fit: cover;
         display: block;
+        transition: transform 0.25s ease;
+      }
+      .image-card:hover img,
+      .image-card:hover video {
+        transform: scale(1.02);
       }
       .placeholder-card {
         background: linear-gradient(
           90deg,
-          #f0f0f0 25%,
-          #e0e0e0 50%,
-          #f0f0f0 75%
+          rgba(15, 23, 42, 0.72) 25%,
+          rgba(30, 41, 59, 0.8) 50%,
+          rgba(15, 23, 42, 0.72) 75%
         );
         background-size: 200% 100%;
-        animation: shimmer 1.5s infinite;
-        border-radius: 12px;
+        animation: shimmer 1.35s infinite;
+        border-radius: 16px;
         height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #999;
+        color: #cbd5e1;
       }
       @keyframes shimmer {
         0% {
@@ -98,6 +178,206 @@
         align-items: center;
         justify-content: center;
         margin: 20px 0;
+      }
+      .hana-command-overlay {
+        background: rgba(2, 6, 23, 0.7);
+      }
+      .hana-command-panel {
+        border-color: rgba(148, 163, 184, 0.3) !important;
+        background: linear-gradient(165deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.8));
+        box-shadow: 0 35px 70px rgba(2, 6, 23, 0.55);
+      }
+      .menu-orb-dock {
+        position: relative;
+        width: 0;
+        height: 0;
+      }
+      .menu-orb-radial {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 290px;
+        height: 290px;
+        border-radius: 999px;
+        pointer-events: none;
+        transform: translate(-50%, -50%) scale(0.82);
+        opacity: 0;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        background:
+          radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0) 64%),
+          radial-gradient(circle at 50% 50%, rgba(14, 116, 144, 0.14), rgba(15, 23, 42, 0) 78%);
+        filter: blur(1px);
+      }
+      .menu-orb-expanded .menu-orb-radial {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      @keyframes menuOrbPulse {
+        0%, 100% {
+          box-shadow:
+            0 16px 34px rgba(2, 6, 23, 0.48),
+            0 0 0 1px rgba(34, 211, 238, 0.18),
+            0 0 0 0 rgba(56, 189, 248, 0.24);
+        }
+        50% {
+          box-shadow:
+            0 20px 40px rgba(2, 6, 23, 0.56),
+            0 0 0 1px rgba(34, 211, 238, 0.28),
+            0 0 0 14px rgba(56, 189, 248, 0);
+        }
+      }
+      .menu-orb-core {
+        position: relative;
+        width: 62px;
+        height: 62px;
+        border-radius: 999px;
+        border: 1px solid rgba(125, 211, 252, 0.62);
+        background:
+          radial-gradient(circle at 30% 24%, rgba(125, 211, 252, 0.42), rgba(56, 189, 248, 0.08) 42%, transparent 60%),
+          linear-gradient(165deg, rgba(14, 116, 144, 0.96), rgba(15, 23, 42, 0.94));
+        color: #f8fafc;
+        box-shadow:
+          0 16px 34px rgba(2, 6, 23, 0.48),
+          0 0 0 1px rgba(34, 211, 238, 0.18);
+        cursor: grab;
+        user-select: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        animation: menuOrbPulse 2.4s ease-in-out infinite;
+      }
+      .menu-orb-expanded .menu-orb-core {
+        animation: none;
+      }
+      .menu-orb-core:active {
+        cursor: grabbing;
+        transform: none;
+      }
+      .menu-orb-core-icon {
+        font-size: 1.2rem;
+        line-height: 1;
+      }
+      .menu-orb-core-key {
+        position: absolute;
+        right: -5px;
+        bottom: -6px;
+        min-width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.48);
+        background: rgba(15, 23, 42, 0.94);
+        color: #e2e8f0;
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.68rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 14px rgba(2, 6, 23, 0.46);
+      }
+      @keyframes menuOrbActionFade {
+        from {
+          opacity: 0;
+          filter: blur(4px);
+        }
+        to {
+          opacity: 1;
+          filter: blur(0);
+        }
+      }
+      .menu-orb-action {
+        position: absolute;
+        min-width: 140px;
+        max-width: 196px;
+        padding: 0.45rem 0.72rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: linear-gradient(165deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9));
+        color: #f8fafc;
+        font-size: 0.76rem;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        box-shadow: 0 12px 25px rgba(2, 6, 23, 0.4);
+        opacity: 0;
+        animation: menuOrbActionFade 0.14s ease-out forwards;
+      }
+      .menu-orb-action:hover {
+        border-color: rgba(125, 211, 252, 0.58);
+        box-shadow:
+          0 16px 30px rgba(2, 6, 23, 0.5),
+          0 0 0 1px rgba(56, 189, 248, 0.2);
+      }
+      .menu-orb-action-content {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+      }
+      .menu-orb-action-index {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.52);
+        background: rgba(51, 65, 85, 0.55);
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.58rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        color: #cbd5e1;
+      }
+      .menu-orb-action-label {
+        display: block;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      kbd {
+        font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.76rem;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+      }
+      button {
+        transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.2s ease;
+      }
+      button:hover {
+        filter: brightness(1.03);
+      }
+      button:active {
+        transform: translateY(1px) scale(0.99);
+      }
+      input:focus-visible,
+      select:focus-visible,
+      button:focus-visible {
+        outline: 2px solid rgba(56, 189, 248, 0.55);
+        outline-offset: 1px;
+      }
+      @media (max-width: 900px) {
+        .waterfall-container {
+          gap: 10px;
+          padding: 12px;
+        }
+        .waterfall-column {
+          flex: 1 0 150px;
+          min-width: 150px;
+          gap: 10px;
+        }
+        .image-card {
+          border-radius: 14px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
       }
       /* Mosaic Mode Animations */
       @keyframes mosaicFadeIn {
@@ -136,6 +416,9 @@
       const { useState, useEffect, useCallback, useRef, useMemo, createContext, useContext } = React
       const BATCH_SIZE = 20
       const COLUMN_COUNT = 4
+      const LARGE_IMAGE_BYTES = 12 * 1024 * 1024
+      const HEAVY_COLLECTION_MIN_COUNT = 400
+      const HEAVY_COLLECTION_AVG_BYTES = 6 * 1024 * 1024
 
       // --- i18n System ---
       const I18nContext = createContext({ t: key => key, locale: 'en', setLocale: () => {}, availableLocales: ['en'] })
@@ -473,6 +756,7 @@
         openDirectory: 'o',
         viewFavorites: 'f',
         toggleDeleteMode: 'Backspace',
+        toggleAppMenu: 'u',
         newTab: 't',
         closeTab: 'w',
         toggleDarkMode: 'm',
@@ -506,6 +790,7 @@
         openDirectory: 'keybindingLabels.openDirectory',
         viewFavorites: 'keybindingLabels.viewFavorites',
         toggleDeleteMode: 'keybindingLabels.toggleDeleteMode',
+        toggleAppMenu: 'keybindingLabels.toggleAppMenu',
         newTab: 'keybindingLabels.newTab',
         closeTab: 'keybindingLabels.closeTab',
         toggleDarkMode: 'keybindingLabels.toggleDarkMode',
@@ -530,6 +815,208 @@
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
       }
 
+      const DARK_THEME_KEYS = new Set([
+        'midnight',
+        'ocean',
+        'forest',
+        'crimson',
+        'cyberpunk',
+        'mocha',
+        'aurora'
+      ])
+
+      const isVideoMedia = media => media?.mediaType === 'video'
+      const isImageMedia = media => !isVideoMedia(media)
+      const VIDEO_MIME_TYPES = {
+        mp4: 'video/mp4',
+        m4v: 'video/mp4',
+        mov: 'video/quicktime',
+        webm: 'video/webm',
+        mkv: 'video/x-matroska',
+        avi: 'video/x-msvideo',
+        wmv: 'video/x-ms-wmv',
+        flv: 'video/x-flv',
+        mpeg: 'video/mpeg',
+        mpg: 'video/mpeg'
+      }
+      const getMediaSourceUrl = media => {
+        const sourceUrl = media?.url || ''
+        if (!sourceUrl) return ''
+        return isVideoMedia(media)
+          ? sourceUrl.replace(/^local-image:\/\//, 'file://')
+          : sourceUrl
+      }
+      const getVideoMimeType = media => {
+        const ext = media?.name?.split('.').pop()?.toLowerCase() || ''
+        return VIDEO_MIME_TYPES[ext] || 'video/*'
+      }
+      const VIDEO_CACHE_VERSION = 'v2'
+      const getMediaCacheKey = media => `${VIDEO_CACHE_VERSION}::${media?.fullPath || ''}::${media?.size || 0}::${media?.lastModified || 0}`
+      const videoPosterCache = new Map()
+      const videoInfoCache = new Map()
+      const starStatusCache = new Map()
+      const IMAGE_GRID_THUMB_MAX_SIDE = 384
+      const imageThumbnailCache = new Map()
+      const imageThumbnailInFlight = new Map()
+      const IMAGE_THUMB_REQUEST_CONCURRENCY = 2
+      const imageThumbRequestQueue = []
+      let imageThumbRequestActive = 0
+      const processImageThumbRequestQueue = () => {
+        while (
+          imageThumbRequestActive < IMAGE_THUMB_REQUEST_CONCURRENCY &&
+          imageThumbRequestQueue.length > 0
+        ) {
+          const next = imageThumbRequestQueue.shift()
+          if (!next) break
+          imageThumbRequestActive += 1
+          ;(async () => {
+            let result = null
+            try {
+              result = await next.task()
+            } catch (error) {
+              result = null
+            } finally {
+              next.resolve(result)
+              imageThumbRequestActive = Math.max(0, imageThumbRequestActive - 1)
+              processImageThumbRequestQueue()
+            }
+          })()
+        }
+      }
+      const enqueueImageThumbRequest = (task, priority = 'normal') =>
+        new Promise(resolve => {
+          const item = { task, resolve }
+          if (priority === 'high') imageThumbRequestQueue.unshift(item)
+          else imageThumbRequestQueue.push(item)
+          processImageThumbRequestQueue()
+        })
+      const requestImageThumbnail = (media, priority = 'high') => {
+        if (!media || isVideoMedia(media)) return Promise.resolve(null)
+        const cacheKey = getMediaCacheKey(media)
+        const cached = imageThumbnailCache.get(cacheKey)
+        if (cached) return Promise.resolve(cached)
+        if (media.thumbnailUrl) {
+          imageThumbnailCache.set(cacheKey, media.thumbnailUrl)
+          return Promise.resolve(media.thumbnailUrl)
+        }
+        const inFlight = imageThumbnailInFlight.get(cacheKey)
+        if (inFlight) return inFlight
+
+        const task = (async () => {
+          try {
+            const thumbUrl = await enqueueImageThumbRequest(
+              async () => {
+                if (!window.electronAPI.getImageThumbnail) return null
+                return window.electronAPI.getImageThumbnail(
+                  media.fullPath,
+                  IMAGE_GRID_THUMB_MAX_SIDE
+                )
+              },
+              priority
+            )
+            if (thumbUrl) {
+              imageThumbnailCache.set(cacheKey, thumbUrl)
+            }
+            return thumbUrl || null
+          } catch (error) {
+            return null
+          } finally {
+            imageThumbnailInFlight.delete(cacheKey)
+          }
+        })()
+
+        imageThumbnailInFlight.set(cacheKey, task)
+        return task
+      }
+      const isHevcCodecName = codecName => {
+        const c = (codecName || '').toLowerCase()
+        return c === 'hevc' || c === 'h265' || c === 'h.265' || c === 'hev1' || c === 'hvc1'
+      }
+      const captureVideoPoster = media =>
+        new Promise((resolve, reject) => {
+          const src = getMediaSourceUrl(media)
+          if (!src) {
+            reject(new Error('No media source'))
+            return
+          }
+
+          const video = document.createElement('video')
+          video.preload = 'metadata'
+          video.muted = true
+          video.playsInline = true
+
+          let settled = false
+          const timeout = setTimeout(() => {
+            settle(reject, new Error('Poster generation timed out'))
+          }, 3500)
+
+          const cleanup = () => {
+            clearTimeout(timeout)
+            video.onloadedmetadata = null
+            video.onloadeddata = null
+            video.onseeked = null
+            video.onerror = null
+            video.pause()
+            video.removeAttribute('src')
+            video.load()
+          }
+
+          const settle = (fn, value) => {
+            if (settled) return
+            settled = true
+            cleanup()
+            fn(value)
+          }
+
+          const capture = () => {
+            if (!video.videoWidth || !video.videoHeight) {
+              settle(reject, new Error('No video track'))
+              return
+            }
+            try {
+              const maxWidth = 480
+              const scale = Math.min(1, maxWidth / video.videoWidth)
+              const canvas = document.createElement('canvas')
+              canvas.width = Math.max(1, Math.round(video.videoWidth * scale))
+              canvas.height = Math.max(1, Math.round(video.videoHeight * scale))
+              const ctx = canvas.getContext('2d')
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.82)
+              settle(resolve, dataUrl)
+            } catch (error) {
+              settle(reject, error)
+            }
+          }
+
+          video.onloadedmetadata = () => {
+            if (!video.videoWidth || !video.videoHeight) {
+              settle(reject, new Error('No video track'))
+              return
+            }
+            const targetTime = Number.isFinite(video.duration) && video.duration > 0
+              ? Math.min(1, Math.max(0.05, video.duration * 0.1))
+              : 0
+            if (targetTime === 0) {
+              capture()
+            } else {
+              try {
+                video.currentTime = targetTime
+              } catch (error) {
+                capture()
+              }
+            }
+          }
+          video.onloadeddata = () => {
+            if (video.currentTime === 0) {
+              capture()
+            }
+          }
+          video.onseeked = capture
+          video.onerror = () => settle(reject, new Error('Video load failed'))
+          video.src = src
+          video.load()
+        })
+
       const ImageCard = React.memo(
         ({
           image,
@@ -541,18 +1028,41 @@
           isSelected,
           showStarButton,
           onContextMenu,
-          starVersion,
           retainImages
         }) => {
           const { t } = useI18n()
-          const [imageLoaded, setImageLoaded] = useState(() => retainImages && loadedImagesCache.has(image.fullPath))
+          const isVideo = isVideoMedia(image)
+          const imageCacheKey = getMediaCacheKey(image)
+          const [videoPoster, setVideoPoster] = useState(() => isVideo ? (videoPosterCache.get(imageCacheKey) || null) : null)
+          const [imageThumbnailUrl, setImageThumbnailUrl] = useState(() => {
+            if (isVideo) return null
+            const cachedThumb = imageThumbnailCache.get(imageCacheKey)
+            if (cachedThumb) return cachedThumb
+            if (image.thumbnailUrl) {
+              imageThumbnailCache.set(imageCacheKey, image.thumbnailUrl)
+              return image.thumbnailUrl
+            }
+            return null
+          })
+          const [useOriginalImage, setUseOriginalImage] = useState(false)
+          const [imageLoaded, setImageLoaded] = useState(
+            () => (retainImages && loadedImagesCache.has(image.fullPath)) || (isVideo && videoPosterCache.has(imageCacheKey))
+          )
           const [imageError, setImageError] = useState(false)
           const [isStarred, setIsStarred] = useState(false)
           const handleImageLoad = useCallback(() => {
             setImageLoaded(true)
             if (retainImages) loadedImagesCache.add(image.fullPath)
           }, [image.fullPath, retainImages])
-          const handleImageError = useCallback(() => setImageError(true), [])
+          const handleImageError = useCallback(() => {
+            if (!isVideo && imageThumbnailUrl && !useOriginalImage) {
+              imageThumbnailCache.delete(imageCacheKey)
+              setImageLoaded(false)
+              setUseOriginalImage(true)
+              return
+            }
+            setImageError(true)
+          }, [isVideo, imageThumbnailUrl, useOriginalImage, imageCacheKey])
           const handleClick = useCallback(() => {
             if (deleteMode) {
               onToggleSelection(image)
@@ -562,13 +1072,103 @@
           }, [deleteMode, image, onToggleSelection, onImageClick])
 
           useEffect(() => {
-            window.electronAPI.isImageStarred(image.fullPath).then(setIsStarred)
-          }, [image.fullPath, starVersion])
+            if (!showStarButton) {
+              setIsStarred(false)
+              return
+            }
+            const cachedStatus = starStatusCache.get(image.fullPath)
+            if (typeof cachedStatus === 'boolean') {
+              setIsStarred(cachedStatus)
+              return
+            }
+            let cancelled = false
+            window.electronAPI.isImageStarred(image.fullPath).then(starred => {
+              if (cancelled) return
+              starStatusCache.set(image.fullPath, Boolean(starred))
+              setIsStarred(Boolean(starred))
+            }).catch(() => {})
+            return () => {
+              cancelled = true
+            }
+          }, [image.fullPath, showStarButton])
+
+          useEffect(() => {
+            if (!isVideo) return
+            const cachedPoster = videoPosterCache.get(imageCacheKey)
+            if (cachedPoster) {
+              setVideoPoster(cachedPoster)
+              setImageLoaded(true)
+              return
+            }
+
+            let cancelled = false
+            ;(async () => {
+              try {
+                let posterDataUrl = null
+                if (window.electronAPI.getVideoThumbnail) {
+                  posterDataUrl = await window.electronAPI.getVideoThumbnail(image.fullPath)
+                }
+                if (!posterDataUrl) {
+                  posterDataUrl = await captureVideoPoster(image)
+                }
+                if (!posterDataUrl || cancelled) return
+                videoPosterCache.set(imageCacheKey, posterDataUrl)
+                setVideoPoster(posterDataUrl)
+                setImageLoaded(true)
+                if (retainImages) loadedImagesCache.add(image.fullPath)
+              } catch (error) {
+                if (cancelled) return
+                // Let the video element fallback path attempt load
+              }
+            })()
+
+            return () => {
+              cancelled = true
+            }
+          }, [isVideo, imageCacheKey, image.fullPath, image.url, image.name, retainImages])
+
+          useEffect(() => {
+            if (isVideo) return
+            const cachedThumb = imageThumbnailCache.get(imageCacheKey)
+            if (cachedThumb) {
+              setImageThumbnailUrl(cachedThumb)
+              return
+            }
+            if (image.thumbnailUrl) {
+              imageThumbnailCache.set(imageCacheKey, image.thumbnailUrl)
+              setImageThumbnailUrl(image.thumbnailUrl)
+              return
+            }
+
+            let cancelled = false
+            const originalFallbackTimer = setTimeout(() => {
+              if (!cancelled) setUseOriginalImage(true)
+            }, 350)
+            ;(async () => {
+              const thumbUrl = await requestImageThumbnail(image)
+              if (cancelled) return
+              clearTimeout(originalFallbackTimer)
+              if (thumbUrl) {
+                setImageThumbnailUrl(thumbUrl)
+              } else {
+                setUseOriginalImage(true)
+              }
+            })()
+
+            return () => {
+              cancelled = true
+              clearTimeout(originalFallbackTimer)
+            }
+          }, [isVideo, image, imageCacheKey])
+
+          const imageSource = useOriginalImage ? image.url : imageThumbnailUrl
+          const showPlaceholder = !imageLoaded || (!isVideo && !imageSource)
 
           const handleStar = useCallback(async e => {
             e.stopPropagation()
             await onStar(image)
             const starred = await window.electronAPI.isImageStarred(image.fullPath)
+            starStatusCache.set(image.fullPath, Boolean(starred))
             setIsStarred(starred)
           }, [image, onStar])
 
@@ -597,10 +1197,10 @@
               onClick={handleClick}
               onContextMenu={handleContextMenuEvent}
             >
-              {!imageLoaded && (
+              {showPlaceholder && (
                 <div className="placeholder-card">
                   <div className="text-center">
-                    <div className="text-2xl mb-2">🖼️</div>
+                    <div className="text-2xl mb-2">{isVideo ? '🎬' : '🖼️'}</div>
                     <div className="text-sm">{t('app.loading')}</div>
                   </div>
                 </div>
@@ -610,15 +1210,53 @@
                   isSelected ? 'ring-4 ring-blue-500' : ''
                 }`}
               >
-                <img
-                  src={image.url}
-                  alt={image.name}
-                  onLoad={handleImageLoad}
-                  onError={handleImageError}
-                  className={`transition-opacity duration-300 ${
-                    imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'
-                  }`}
-                />
+                {isVideo ? (
+                  videoPoster ? (
+                    <img
+                      src={videoPoster}
+                      alt={image.name}
+                      loading="lazy"
+                      decoding="async"
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                      className={`transition-opacity duration-300 ${
+                        imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                      }`}
+                    />
+                  ) : (
+                    <video
+                      muted
+                      playsInline
+                      preload="metadata"
+                      onLoadedData={handleImageLoad}
+                      onError={handleImageError}
+                      className={`transition-opacity duration-300 ${
+                        imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                      }`}
+                    >
+                      <source src={getMediaSourceUrl(image)} type={getVideoMimeType(image)} />
+                    </video>
+                  )
+                ) : (
+                  imageSource ? (
+                    <img
+                      src={imageSource}
+                      alt={image.name}
+                      loading="lazy"
+                      decoding="async"
+                      onLoad={handleImageLoad}
+                      onError={handleImageError}
+                      className={`transition-opacity duration-300 ${
+                        imageLoaded ? 'opacity-100' : 'opacity-0 absolute inset-0'
+                      }`}
+                    />
+                  ) : null
+                )}
+                {isVideo && (
+                  <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                    VIDEO
+                  </div>
+                )}
                 {isSelected && (
                   <div className="absolute inset-0 bg-blue-500 bg-opacity-40 flex items-center justify-center text-white text-4xl font-bold">
                     ✓
@@ -663,7 +1301,6 @@
           columnCount,
           showStarButton,
           onContextMenu,
-          starVersion,
           retainImages
         }) => {
           const { t } = useI18n()
@@ -691,7 +1328,6 @@
                         isSelected={isSelected(image)}
                         showStarButton={showStarButton}
                         onContextMenu={onContextMenu}
-                        starVersion={starVersion}
                         retainImages={retainImages}
                       />
                     ))}
@@ -741,6 +1377,8 @@
           const [isDragging, setIsDragging] = useState(false)
           const [dragMode, setDragMode] = useState(false)
           const dragStartRef = useRef({ x: 0, y: 0 })
+          const dragOriginRef = useRef({ x: 0, y: 0 })
+          const movedDuringDragRef = useRef(false)
           const positionRef = useRef({ x: 0, y: 0 })
           const zoomRef = useRef(1)
           const [dimensions, setDimensions] = useState(null)
@@ -750,9 +1388,16 @@
           const [resizeW, setResizeW] = useState('')
           const [resizeH, setResizeH] = useState('')
           const [contextMenu, setContextMenu] = useState(null)
+          const [videoUnsupported, setVideoUnsupported] = useState(false)
+          const [videoInfo, setVideoInfo] = useState(null)
+          const [modalVideoPoster, setModalVideoPoster] = useState(null)
           const [showMetadata, setShowMetadata] = useState(() => localStorage.getItem('imageViewerShowMetadata') !== 'false')
           const imageRef = useRef(null)
-          const canvasRef = useRef(null)
+          const videoRef = useRef(null)
+          const isVideo = isVideoMedia(selectedImage)
+          const isImage = isImageMedia(selectedImage)
+          const selectedMediaCacheKey = getMediaCacheKey(selectedImage)
+          const canPanImage = isImage && !editMode && (dragMode || zoom > 1)
 
           // Save metadata preference
           useEffect(() => {
@@ -769,7 +1414,59 @@
             setDragMode(false)
             setCropArea(null)
             setContextMenu(null)
+            setVideoUnsupported(false)
+            setVideoInfo(null)
+            setModalVideoPoster(null)
+            movedDuringDragRef.current = false
           }, [selectedImage?.fullPath])
+
+          useEffect(() => {
+            if (!selectedImage || !isVideo) return
+            let cancelled = false
+
+            ;(async () => {
+              try {
+                let info = videoInfoCache.get(selectedMediaCacheKey) || null
+                if (!info && window.electronAPI.getVideoInfo) {
+                  info = await window.electronAPI.getVideoInfo(selectedImage.fullPath)
+                  if (info) videoInfoCache.set(selectedMediaCacheKey, info)
+                }
+                if (cancelled) return
+                if (info) {
+                  setVideoInfo(info)
+                  if (info.width > 0 && info.height > 0) {
+                    setDimensions({ w: info.width, h: info.height })
+                  }
+                  if (isHevcCodecName(info.codecName)) {
+                    setVideoUnsupported(true)
+                  }
+                }
+              } catch (error) {}
+
+              try {
+                let poster = videoPosterCache.get(selectedMediaCacheKey) || null
+                if (!poster && window.electronAPI.getVideoThumbnail) {
+                  poster = await window.electronAPI.getVideoThumbnail(selectedImage.fullPath)
+                  if (poster) videoPosterCache.set(selectedMediaCacheKey, poster)
+                }
+                if (!cancelled && poster) setModalVideoPoster(poster)
+              } catch (error) {}
+            })()
+
+            return () => {
+              cancelled = true
+            }
+          }, [selectedImage?.fullPath, selectedMediaCacheKey, isVideo])
+
+          useEffect(() => {
+            if (!isImage) return
+            if (zoom <= 1 && !dragMode) {
+              if (positionRef.current.x !== 0 || positionRef.current.y !== 0) {
+                positionRef.current = { x: 0, y: 0 }
+                setPosition({ x: 0, y: 0 })
+              }
+            }
+          }, [dragMode, isImage, zoom])
 
           const currentIndex = useMemo(
             () =>
@@ -802,6 +1499,7 @@
           }, [currentIndex, filteredImages, onNavigate])
 
           const handleWheel = useCallback(e => {
+            if (!isImage) return
             e.preventDefault()
             const delta = e.deltaY > 0 ? 0.9 : 1.1
             setZoom(z => {
@@ -809,20 +1507,28 @@
               zoomRef.current = newZoom
               return newZoom
             })
-          }, [])
+          }, [isImage])
 
           const handleMouseDown = useCallback(e => {
-            // Allow drag when in drag mode (no zoom requirement)
-            if (dragMode && !editMode) {
-              e.preventDefault()
-              e.stopPropagation()
-              setIsDragging(true)
-              dragStartRef.current = { x: e.clientX - positionRef.current.x, y: e.clientY - positionRef.current.y }
+            if (!canPanImage || e.button !== 0) return
+            e.preventDefault()
+            e.stopPropagation()
+            movedDuringDragRef.current = false
+            setIsDragging(true)
+            dragOriginRef.current = { x: e.clientX, y: e.clientY }
+            dragStartRef.current = {
+              x: e.clientX - positionRef.current.x,
+              y: e.clientY - positionRef.current.y
             }
-          }, [editMode, dragMode])
+          }, [canPanImage])
 
           const handleMouseMove = useCallback(e => {
             if (isDragging) {
+              const movedX = Math.abs(e.clientX - dragOriginRef.current.x)
+              const movedY = Math.abs(e.clientY - dragOriginRef.current.y)
+              if (movedX > 2 || movedY > 2) {
+                movedDuringDragRef.current = true
+              }
               const newPos = { x: e.clientX - dragStartRef.current.x, y: e.clientY - dragStartRef.current.y }
               positionRef.current = newPos
               setPosition(newPos)
@@ -917,36 +1623,41 @@
               if (key === keybindings.closeModal) onClose()
               else if (key === keybindings.prevImage) showPrevious()
               else if (key === keybindings.nextImage) showNext()
-              else if (key === keybindings.zoomIn || key === '=') setZoom(z => { const nz = Math.min(z * 1.2, 5); zoomRef.current = nz; return nz })
-              else if (key === keybindings.zoomOut) setZoom(z => { const nz = Math.max(z / 1.2, 0.5); zoomRef.current = nz; return nz })
-              else if (key === keybindings.resetZoom) { setZoom(1); zoomRef.current = 1; setPosition({ x: 0, y: 0 }); positionRef.current = { x: 0, y: 0 }; setDragMode(false) }
-              else if (key === keybindings.toggleDragMode || key === 'D') { setDragMode(d => !d) }
+              else if ((key === keybindings.zoomIn || key === '=') && isImage) setZoom(z => { const nz = Math.min(z * 1.2, 5); zoomRef.current = nz; return nz })
+              else if (key === keybindings.zoomOut && isImage) setZoom(z => { const nz = Math.max(z / 1.2, 0.5); zoomRef.current = nz; return nz })
+              else if (key === keybindings.resetZoom && isImage) { setZoom(1); zoomRef.current = 1; setPosition({ x: 0, y: 0 }); positionRef.current = { x: 0, y: 0 }; setDragMode(false) }
+              else if ((key === keybindings.toggleDragMode || key === 'D') && isImage) { setDragMode(d => !d) }
               else if (key === keybindings.toggleSlideshow) { e.preventDefault(); setSlideshow(s => !s) }
               else if (key === keybindings.deleteImage) { onDelete([selectedImage.fullPath]) }
               else if (key === keybindings.starImage || key === 'S') { onStar(selectedImage) }
-              else if (key === keybindings.copyToClipboard) {
+              else if (key === keybindings.copyToClipboard && isImage) {
                 try {
                   await window.electronAPI.copyImageToClipboard(selectedImage.fullPath)
                   if (showActionFeedback) alert(t('prompts.copied'))
                 } catch (err) { alert(t('prompts.error') + ': ' + err.message) }
               }
               else if (key === keybindings.openLocation || key === 'L') { onOpenLocation(selectedImage) }
-              else if (key === keybindings.cropImage || key === 'X') { setEditMode(editMode === 'crop' ? null : 'crop'); setCropArea(null) }
-              else if (key === keybindings.resizeImage || key === 'R') { setEditMode(editMode === 'resize' ? null : 'resize'); if (dimensions) { setResizeW(String(dimensions.w)); setResizeH(String(dimensions.h)) } }
+              else if ((key === keybindings.cropImage || key === 'X') && isImage) { setEditMode(editMode === 'crop' ? null : 'crop'); setCropArea(null) }
+              else if ((key === keybindings.resizeImage || key === 'R') && isImage) { setEditMode(editMode === 'resize' ? null : 'resize'); if (dimensions) { setResizeW(String(dimensions.w)); setResizeH(String(dimensions.h)) } }
               else if (key === keybindings.toggleMetadata || key === keybindings.mosaicToggleDrawer) { setShowMetadata(v => !v) }
             }
             document.addEventListener('keydown', handleKeyPress)
             return () => document.removeEventListener('keydown', handleKeyPress)
-          }, [onClose, showPrevious, showNext, selectedImage, keybindings, onDelete, onStar, onOpenLocation, showActionFeedback, editMode, dimensions])
+          }, [onClose, showPrevious, showNext, selectedImage, keybindings, onDelete, onStar, onOpenLocation, showActionFeedback, editMode, dimensions, isImage, t])
 
           if (!selectedImage) return null
+          const useExternalPlayerForVideo = isVideo && (videoUnsupported || isHevcCodecName(videoInfo?.codecName))
 
           const handleBackdropClick = e => {
             if (contextMenu) {
               setContextMenu(null)
               return
             }
-            if (clickOutsideToClose && e.target === e.currentTarget && zoomRef.current <= 1) {
+            if (movedDuringDragRef.current) {
+              movedDuringDragRef.current = false
+              return
+            }
+            if (clickOutsideToClose && e.target === e.currentTarget && (!isImage || zoomRef.current <= 1)) {
               onClose()
             }
           }
@@ -957,36 +1668,99 @@
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
-              onMouseDown={handleMouseDown}
               onClick={handleBackdropClick}
             >
               <div className="relative w-full h-full flex items-center justify-center p-4" onClick={handleBackdropClick}>
-                <div className="relative" onMouseDown={editMode === 'crop' ? handleCropStart : undefined} onMouseMove={editMode === 'crop' ? handleCropMove : undefined} onMouseUp={editMode === 'crop' ? handleCropEnd : undefined} onMouseLeave={editMode === 'crop' ? handleCropEnd : undefined} onClick={e => e.stopPropagation()}>
-                  <img
-                    ref={imageRef}
-                    src={selectedImage.url}
-                    alt={selectedImage.name}
-                    className="object-contain select-none"
-                    style={{
-                      maxWidth: `${maxImageSize}vw`,
-                      maxHeight: `${maxImageSize - 5}vh`,
-                      transform: editMode ? 'none' : `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
-                      cursor: editMode === 'crop' ? 'crosshair' : (dragMode ? (isDragging ? 'grabbing' : 'grab') : 'default'),
-                      transition: isDragging ? 'none' : 'transform 0.1s ease-out'
-                    }}
-                    onWheel={editMode ? undefined : handleWheel}
-                    onMouseDown={editMode ? undefined : handleMouseDown}
-                    onLoad={e => setDimensions({ w: e.target.naturalWidth, h: e.target.naturalHeight })}
-                    draggable={false}
-                    onContextMenu={handleContextMenu}
-                  />
-                  {editMode === 'crop' && cropArea && (
+                <div className="relative" onMouseDown={isImage && editMode === 'crop' ? handleCropStart : undefined} onMouseMove={isImage && editMode === 'crop' ? handleCropMove : undefined} onMouseUp={isImage && editMode === 'crop' ? handleCropEnd : undefined} onMouseLeave={isImage && editMode === 'crop' ? handleCropEnd : undefined} onClick={e => e.stopPropagation()}>
+                  {isVideo ? (
+                    useExternalPlayerForVideo ? (
+                      <div
+                        className="relative flex items-center justify-center bg-black/60 rounded-lg overflow-hidden"
+                        style={{
+                          maxWidth: `${maxImageSize}vw`,
+                          maxHeight: `${maxImageSize - 5}vh`,
+                          minWidth: '320px',
+                          minHeight: '180px'
+                        }}
+                      >
+                        {modalVideoPoster ? (
+                          <img
+                            src={modalVideoPoster}
+                            alt={selectedImage.name}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-white/70 text-6xl">🎬</div>
+                        )}
+                      </div>
+                    ) : (
+                      <video
+                        ref={videoRef}
+                        controls
+                        autoPlay
+                        playsInline
+                        preload="auto"
+                        className="object-contain select-none"
+                        style={{
+                          maxWidth: `${maxImageSize}vw`,
+                          maxHeight: `${maxImageSize - 5}vh`
+                        }}
+                        onLoadedMetadata={e => {
+                          const w = e.target.videoWidth || 0
+                          const h = e.target.videoHeight || 0
+                          setDimensions({ w, h })
+                          setVideoUnsupported(w === 0 || h === 0)
+                        }}
+                        onError={() => setVideoUnsupported(true)}
+                        onContextMenu={handleContextMenu}
+                      >
+                        <source src={getMediaSourceUrl(selectedImage)} type={getVideoMimeType(selectedImage)} />
+                      </video>
+                    )
+                  ) : (
+                    <img
+                      ref={imageRef}
+                      src={selectedImage.url}
+                      alt={selectedImage.name}
+                      className="object-contain select-none"
+                      style={{
+                        maxWidth: `${maxImageSize}vw`,
+                        maxHeight: `${maxImageSize - 5}vh`,
+                        transform: editMode ? 'none' : `scale(${zoom}) translate(${position.x / zoom}px, ${position.y / zoom}px)`,
+                        cursor: editMode === 'crop' ? 'crosshair' : (canPanImage ? (isDragging ? 'grabbing' : 'grab') : 'default'),
+                        transition: isDragging ? 'none' : 'transform 0.1s ease-out'
+                      }}
+                      onWheel={editMode ? undefined : handleWheel}
+                      onMouseDown={editMode ? undefined : handleMouseDown}
+                      onLoad={e => setDimensions({ w: e.target.naturalWidth, h: e.target.naturalHeight })}
+                      draggable={false}
+                      onContextMenu={handleContextMenu}
+                    />
+                  )}
+                  {isImage && editMode === 'crop' && cropArea && (
                     <div
                       className="absolute border-2 border-dashed border-white bg-white bg-opacity-20 pointer-events-none"
                       style={{ left: cropArea.x, top: cropArea.y, width: cropArea.w, height: cropArea.h }}
                     />
                   )}
                 </div>
+                {isVideo && useExternalPlayerForVideo && (
+                  <div className="absolute left-1/2 -translate-x-1/2 top-6 bg-black/80 border border-white/30 text-white px-4 py-3 rounded-lg text-sm max-w-xl text-center backdrop-blur-sm">
+                    <p>{t('viewer.videoCodecNotSupported')}</p>
+                    <button
+                      className="mt-2 px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={async () => {
+                        try {
+                          await window.electronAPI.openFile(selectedImage.fullPath)
+                        } catch (error) {
+                          alert(t('prompts.error') + ': ' + error.message)
+                        }
+                      }}
+                    >
+                      {t('viewer.openInExternalPlayer')}
+                    </button>
+                  </div>
+                )}
 
                 {contextMenu && (
                   <div
@@ -996,23 +1770,33 @@
                   >
                     <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => onDelete([selectedImage.fullPath])}>{t('actions.delete')}</button>
                     <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => onOpenLocation(selectedImage)}>{t('contextMenu.openLocation')}</button>
-                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={async () => { await window.electronAPI.copyImageToClipboard(selectedImage.fullPath); if (showActionFeedback) alert(t('prompts.copied')) }}>{t('viewer.copyToClipboard')}</button>
+                    {isImage && (
+                      <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={async () => { await window.electronAPI.copyImageToClipboard(selectedImage.fullPath); if (showActionFeedback) alert(t('prompts.copied')) }}>{t('viewer.copyToClipboard')}</button>
+                    )}
                     <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => onStar(selectedImage)}>{t('star.starUnstar')}</button>
                     <div className="border-t border-white/20 my-1"></div>
                     <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => setSlideshow(s => !s)}>{slideshow ? t('viewer.stopSlideshow') : t('viewer.startSlideshow')}</button>
-                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setEditMode('crop'); setCropArea(null) }}>{t('viewer.crop')}</button>
-                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setEditMode('resize'); if (dimensions) { setResizeW(String(dimensions.w)); setResizeH(String(dimensions.h)) } }}>{t('viewer.resize')}</button>
+                    {isImage && (
+                      <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setEditMode('crop'); setCropArea(null) }}>{t('viewer.crop')}</button>
+                    )}
+                    {isImage && (
+                      <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setEditMode('resize'); if (dimensions) { setResizeW(String(dimensions.w)); setResizeH(String(dimensions.h)) } }}>{t('viewer.resize')}</button>
+                    )}
                     <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => {
                       const newName = prompt(t('prompts.enterNewFilename'), selectedImage.name)
                       if (newName && newName !== selectedImage.name) {
                         window.electronAPI.renameImage(selectedImage.fullPath, newName).then(() => { if (showActionFeedback) alert(t('prompts.fileCopiedNewName')) }).catch(err => alert(t('prompts.error') + ': ' + err.message))
                       }
                     }}>{t('actions.saveAs')}</button>
-                    <div className="border-t border-white/20 my-1"></div>
-                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setZoom(z => { const nz = Math.min(z * 1.2, 5); zoomRef.current = nz; return nz }) }}>{t('viewer.zoomIn')}</button>
-                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setZoom(z => { const nz = Math.max(z / 1.2, 0.5); zoomRef.current = nz; return nz }) }}>{t('viewer.zoomOut')}</button>
-                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setZoom(1); zoomRef.current = 1; setPosition({ x: 0, y: 0 }); positionRef.current = { x: 0, y: 0 }; setDragMode(false) }}>{t('viewer.resetZoom')}</button>
-                    <button className={`w-full px-4 py-2 text-left text-sm transition-colors ${dragMode ? 'text-cyan-400 bg-white/5' : 'text-white'} hover:bg-white/10`} onClick={() => setDragMode(d => !d)}>{dragMode ? '✓ ' + t('viewer.dragModeOn') : t('viewer.enableDragMode')}</button>
+                    {isImage && (
+                      <>
+                        <div className="border-t border-white/20 my-1"></div>
+                        <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setZoom(z => { const nz = Math.min(z * 1.2, 5); zoomRef.current = nz; return nz }) }}>{t('viewer.zoomIn')}</button>
+                        <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setZoom(z => { const nz = Math.max(z / 1.2, 0.5); zoomRef.current = nz; return nz }) }}>{t('viewer.zoomOut')}</button>
+                        <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setZoom(1); zoomRef.current = 1; setPosition({ x: 0, y: 0 }); positionRef.current = { x: 0, y: 0 }; setDragMode(false) }}>{t('viewer.resetZoom')}</button>
+                        <button className={`w-full px-4 py-2 text-left text-sm transition-colors ${dragMode ? 'text-cyan-400 bg-white/5' : 'text-white'} hover:bg-white/10`} onClick={() => setDragMode(d => !d)}>{dragMode ? '✓ ' + t('viewer.dragModeOn') : t('viewer.enableDragMode')}</button>
+                      </>
+                    )}
                     <div className="border-t border-white/20 my-1"></div>
                     <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={onClose}>{t('actions.close')}</button>
                   </div>
@@ -1039,18 +1823,20 @@
                 >
                   📁
                 </button>
-                <button
-                  onClick={async () => {
-                    try {
-                      await window.electronAPI.copyImageToClipboard(selectedImage.fullPath)
-                      if (showActionFeedback) alert(t('prompts.imageCopiedToClipboard'))
-                    } catch (err) { alert(t('prompts.error') + ': ' + err.message) }
-                  }}
-                  className="absolute top-16 left-16 bg-indigo-500 bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all"
-                  title={t('viewer.copyToClipboard')}
-                >
-                  📋
-                </button>
+                {isImage && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await window.electronAPI.copyImageToClipboard(selectedImage.fullPath)
+                        if (showActionFeedback) alert(t('prompts.imageCopiedToClipboard'))
+                      } catch (err) { alert(t('prompts.error') + ': ' + err.message) }
+                    }}
+                    className="absolute top-16 left-16 bg-indigo-500 bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all"
+                    title={t('viewer.copyToClipboard')}
+                  >
+                    📋
+                  </button>
+                )}
                 <button
                   onClick={() => onStar(selectedImage)}
                   className="absolute top-28 left-4 bg-yellow-400 bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all text-lg"
@@ -1065,27 +1851,33 @@
                 >
                   {slideshow ? '⏸️' : '▶️'}
                 </button>
-                <button
-                  onClick={() => setDragMode(d => !d)}
-                  className={`absolute top-40 left-16 ${dragMode ? 'bg-cyan-500' : 'bg-gray-500'} bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all`}
-                  title={dragMode ? t('viewer.dragModeOn') : t('viewer.enableDragMode')}
-                >
-                  ✋
-                </button>
-                <button
-                  onClick={() => { setEditMode(editMode === 'crop' ? null : 'crop'); setCropArea(null) }}
-                  className={`absolute top-52 left-4 ${editMode === 'crop' ? 'bg-purple-500' : 'bg-gray-500'} bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all`}
-                  title={t('viewer.crop')}
-                >
-                  ✂️
-                </button>
-                <button
-                  onClick={() => { setEditMode(editMode === 'resize' ? null : 'resize'); if (dimensions) { setResizeW(String(dimensions.w)); setResizeH(String(dimensions.h)) } }}
-                  className={`absolute top-64 left-4 ${editMode === 'resize' ? 'bg-purple-500' : 'bg-gray-500'} bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all`}
-                  title={t('viewer.resize')}
-                >
-                  📐
-                </button>
+                {isImage && (
+                  <button
+                    onClick={() => setDragMode(d => !d)}
+                    className={`absolute top-40 left-16 ${dragMode ? 'bg-cyan-500' : 'bg-gray-500'} bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all`}
+                    title={dragMode ? t('viewer.dragModeOn') : t('viewer.enableDragMode')}
+                  >
+                    ✋
+                  </button>
+                )}
+                {isImage && (
+                  <button
+                    onClick={() => { setEditMode(editMode === 'crop' ? null : 'crop'); setCropArea(null) }}
+                    className={`absolute top-52 left-4 ${editMode === 'crop' ? 'bg-purple-500' : 'bg-gray-500'} bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all`}
+                    title={t('viewer.crop')}
+                  >
+                    ✂️
+                  </button>
+                )}
+                {isImage && (
+                  <button
+                    onClick={() => { setEditMode(editMode === 'resize' ? null : 'resize'); if (dimensions) { setResizeW(String(dimensions.w)); setResizeH(String(dimensions.h)) } }}
+                    className={`absolute top-64 left-4 ${editMode === 'resize' ? 'bg-purple-500' : 'bg-gray-500'} bg-opacity-80 text-white p-2 rounded-full hover:bg-opacity-100 transition-all`}
+                    title={t('viewer.resize')}
+                  >
+                    📐
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     const newName = prompt(t('prompts.enterNewFilename'), selectedImage.name)
@@ -1104,7 +1896,7 @@
                   ✏️
                 </button>
 
-                {editMode === 'crop' && cropArea && cropArea.w > 10 && cropArea.h > 10 && (
+                {isImage && editMode === 'crop' && cropArea && cropArea.w > 10 && cropArea.h > 10 && (
                   <button
                     onClick={saveCrop}
                     className="absolute top-52 left-16 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
@@ -1113,7 +1905,7 @@
                   </button>
                 )}
 
-                {editMode === 'resize' && (
+                {isImage && editMode === 'resize' && (
                   <div className="absolute top-64 left-16 bg-black bg-opacity-80 p-2 rounded flex items-center gap-2">
                     <input type="number" value={resizeW} onChange={e => setResizeW(e.target.value)} className="w-16 px-1 rounded text-black" placeholder="W" />
                     <span className="text-white">×</span>
@@ -1122,34 +1914,36 @@
                   </div>
                 )}
 
-                <div className="absolute bottom-24 right-4 flex flex-col gap-2">
-                  <button
-                    onClick={() => setZoom(z => { const nz = Math.min(z * 1.2, 5); zoomRef.current = nz; return nz })}
-                    className="bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all"
-                    title={t('viewer.zoomIn') + ' (+)'}
-                  >
-                    🔍+
-                  </button>
-                  <button
-                    onClick={() => setZoom(z => { const nz = Math.max(z / 1.2, 0.5); zoomRef.current = nz; return nz })}
-                    className="bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all"
-                    title={t('viewer.zoomOut') + ' (-)'}
-                  >
-                    🔍-
-                  </button>
-                  <button
-                    onClick={() => { setZoom(1); zoomRef.current = 1; setPosition({ x: 0, y: 0 }); positionRef.current = { x: 0, y: 0 }; setDragMode(false) }}
-                    className="bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all text-sm"
-                    title={t('viewer.resetZoom') + ' (0)'}
-                  >
-                    1:1
-                  </button>
-                  {zoom !== 1 && (
-                    <div className="bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs text-center">
-                      {Math.round(zoom * 100)}%
-                    </div>
-                  )}
-                </div>
+                {isImage && (
+                  <div className="absolute bottom-24 right-4 flex flex-col gap-2">
+                    <button
+                      onClick={() => setZoom(z => { const nz = Math.min(z * 1.2, 5); zoomRef.current = nz; return nz })}
+                      className="bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all"
+                      title={t('viewer.zoomIn') + ' (+)'}
+                    >
+                      🔍+
+                    </button>
+                    <button
+                      onClick={() => setZoom(z => { const nz = Math.max(z / 1.2, 0.5); zoomRef.current = nz; return nz })}
+                      className="bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all"
+                      title={t('viewer.zoomOut') + ' (-)'}
+                    >
+                      🔍-
+                    </button>
+                    <button
+                      onClick={() => { setZoom(1); zoomRef.current = 1; setPosition({ x: 0, y: 0 }); positionRef.current = { x: 0, y: 0 }; setDragMode(false) }}
+                      className="bg-black bg-opacity-60 text-white p-2 rounded-full hover:bg-opacity-80 transition-all text-sm"
+                      title={t('viewer.resetZoom') + ' (0)'}
+                    >
+                      1:1
+                    </button>
+                    {zoom !== 1 && (
+                      <div className="bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs text-center">
+                        {Math.round(zoom * 100)}%
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {currentIndex > 0 && (
                   <button
@@ -1239,6 +2033,7 @@
         const [tileScales, setTileScales] = useState({}) // Individual tile scale factors
         const [drawerOpen, setDrawerOpen] = useState(true) // Drawer state
         const [imageDimensions, setImageDimensions] = useState({}) // Track loaded image dimensions
+        const [videoPosters, setVideoPosters] = useState({}) // tileKey -> dataUrl
         const [layoutMode, setLayoutMode] = useState(() => localStorage.getItem('mosaicLayoutMode') || 'fixed') // 'fixed' or 'adaptive'
 
         // Save layout mode preference
@@ -1289,12 +2084,32 @@
                   return
                 }
 
-                const image = new Image()
                 const timeout = setTimeout(() => {
                   loadedDims[img.fullPath] = { width: 1600, height: 900 }
                   resolve()
                 }, 3000)
 
+                if (isVideoMedia(img)) {
+                  const video = document.createElement('video')
+                  video.preload = 'metadata'
+                  video.onloadedmetadata = () => {
+                    clearTimeout(timeout)
+                    loadedDims[img.fullPath] = {
+                      width: video.videoWidth || 1600,
+                      height: video.videoHeight || 900
+                    }
+                    resolve()
+                  }
+                  video.onerror = () => {
+                    clearTimeout(timeout)
+                    loadedDims[img.fullPath] = { width: 1600, height: 900 }
+                    resolve()
+                  }
+                  video.src = getMediaSourceUrl(img)
+                  return
+                }
+
+                const image = new Image()
                 image.onload = () => {
                   clearTimeout(timeout)
                   loadedDims[img.fullPath] = { width: image.naturalWidth, height: image.naturalHeight }
@@ -1323,6 +2138,33 @@
             loadBatch(0)
           }
 
+          return () => { cancelled = true }
+        }, [images])
+
+        // Prefetch video posters for current/next walls so video tiles have thumbnails
+        useEffect(() => {
+          let cancelled = false
+          const prefetch = async () => {
+            if (!images || images.length === 0) return
+            const candidates = images.filter(isVideoMedia).slice(0, 200) // cap to avoid overwork
+            for (const media of candidates) {
+              const cacheKey = getMediaCacheKey(media)
+              const existing = videoPosterCache.get(cacheKey)
+              if (existing) {
+                if (!cancelled) setVideoPosters(prev => (prev[media.fullPath] ? prev : { ...prev, [media.fullPath]: existing }))
+                continue
+              }
+              try {
+                const poster = window.electronAPI.getVideoThumbnail
+                  ? await window.electronAPI.getVideoThumbnail(media.fullPath)
+                  : null
+                if (!poster || cancelled) continue
+                videoPosterCache.set(cacheKey, poster)
+                if (!cancelled) setVideoPosters(prev => ({ ...prev, [media.fullPath]: poster }))
+              } catch (error) {}
+            }
+          }
+          prefetch()
           return () => { cancelled = true }
         }, [images])
 
@@ -1762,13 +2604,34 @@
                       transformOrigin: 'center center'
                     }}
                   >
-                    <img
-                      src={tile.image.url}
-                      alt={tile.image.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                      draggable={false}
-                    />
+                    {isVideoMedia(tile.image) ? (
+                      (videoPosters[tile.image.fullPath] || videoPosterCache.get(getMediaCacheKey(tile.image))) ? (
+                        <img
+                          src={videoPosters[tile.image.fullPath] || videoPosterCache.get(getMediaCacheKey(tile.image))}
+                          alt={tile.image.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          draggable={false}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-black/40 text-white/70 text-3xl">
+                          🎬
+                        </div>
+                      )
+                    ) : (
+                      <img
+                        src={tile.image.url}
+                        alt={tile.image.name}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        draggable={false}
+                      />
+                    )}
+                    {isVideoMedia(tile.image) && (
+                      <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                        VIDEO
+                      </div>
+                    )}
                     <div className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                       <div className="absolute bottom-2 left-2 right-2 text-white text-sm truncate font-medium">
                         {tile.image.name}
@@ -2069,6 +2932,39 @@
         const [sortOrder, setSortOrder] = useState(
           () => localStorage.getItem('sortOrder') || 'asc'
         )
+        const [filterMediaType, setFilterMediaType] = useState(
+          () => localStorage.getItem('filterMediaType') || 'all'
+        )
+        const [filterSizeBand, setFilterSizeBand] = useState(
+          () => localStorage.getItem('filterSizeBand') || 'all'
+        )
+        const [filterDateBand, setFilterDateBand] = useState(
+          () => localStorage.getItem('filterDateBand') || 'all'
+        )
+        const [showFilterPanel, setShowFilterPanel] = useState(
+          () => localStorage.getItem('showFilterPanel') === 'true'
+        )
+        const [showAppMenu, setShowAppMenu] = useState(
+          () => localStorage.getItem('showAppMenu') !== 'false'
+        )
+        const [menuOrbPosition, setMenuOrbPosition] = useState(() => {
+          const fallback = {
+            x: typeof window !== 'undefined' ? Math.max(72, window.innerWidth - 80) : 1200,
+            y: typeof window !== 'undefined' ? Math.max(72, window.innerHeight - 88) : 720
+          }
+          const raw = localStorage.getItem('menuOrbPosition')
+          if (!raw) return fallback
+          try {
+            const parsed = JSON.parse(raw)
+            const x = Number(parsed?.x)
+            const y = Number(parsed?.y)
+            if (!Number.isFinite(x) || !Number.isFinite(y)) return fallback
+            return { x, y }
+          } catch (error) {
+            return fallback
+          }
+        })
+        const [menuOrbExpanded, setMenuOrbExpanded] = useState(false)
         const [columnCount, setColumnCount] = useState(
           () => parseInt(localStorage.getItem('columnCount')) || 4
         )
@@ -2096,12 +2992,14 @@
         const [showActionFeedback, setShowActionFeedback] = useState(
           () => localStorage.getItem('showActionFeedback') === 'true'
         )
+        const [enableVideos, setEnableVideos] = useState(
+          () => localStorage.getItem('enableVideos') !== 'false'
+        )
         const [maxImageSize, setMaxImageSize] = useState(
           () => parseInt(localStorage.getItem('maxImageSize')) || 90
         )
         const [showHistoryPanel, setShowHistoryPanel] = useState(false)
         const [mainContextMenu, setMainContextMenu] = useState(null)
-        const [starVersion, setStarVersion] = useState(0)
         const [recentDirs, setRecentDirs] = useState(() => {
           const saved = localStorage.getItem('recentDirs')
           return saved ? JSON.parse(saved) : []
@@ -2136,6 +3034,9 @@
         const [mosaicLoopWalls, setMosaicLoopWalls] = useState(
           () => localStorage.getItem('mosaicLoopWalls') !== 'false'
         )
+        const [showCommandPalette, setShowCommandPalette] = useState(false)
+        const [commandQuery, setCommandQuery] = useState('')
+        const [commandSelectionIndex, setCommandSelectionIndex] = useState(0)
 
         // Save mosaic settings to localStorage
         useEffect(() => {
@@ -2155,9 +3056,48 @@
 
         const scrollContainerRef = useRef(null)
         const loadMoreObserverRef = useRef(null)
+        const commandInputRef = useRef(null)
+        const menuOrbDragRef = useRef({
+          dragging: false,
+          moved: false,
+          startX: 0,
+          startY: 0,
+          originX: 0,
+          originY: 0
+        })
 
         const filteredImages = useMemo(() => {
           let imgs = allImages
+          if (!enableVideos) {
+            imgs = imgs.filter(isImageMedia)
+          }
+          if (filterMediaType === 'images') {
+            imgs = imgs.filter(isImageMedia)
+          } else if (filterMediaType === 'videos') {
+            imgs = imgs.filter(isVideoMedia)
+          }
+          if (filterSizeBand !== 'all') {
+            const smallCutoff = 2 * 1024 * 1024
+            const mediumCutoff = 10 * 1024 * 1024
+            imgs = imgs.filter(img => {
+              const size = Number(img.size) || 0
+              if (filterSizeBand === 'small') return size < smallCutoff
+              if (filterSizeBand === 'medium') {
+                return size >= smallCutoff && size <= mediumCutoff
+              }
+              if (filterSizeBand === 'large') return size > mediumCutoff
+              return true
+            })
+          }
+          if (filterDateBand !== 'all') {
+            const now = Date.now()
+            const cutoff = filterDateBand === '24h'
+              ? now - 24 * 60 * 60 * 1000
+              : filterDateBand === '7d'
+              ? now - 7 * 24 * 60 * 60 * 1000
+              : now - 30 * 24 * 60 * 60 * 1000
+            imgs = imgs.filter(img => (Number(img.lastModified) || 0) >= cutoff)
+          }
           if (searchTerm) {
             imgs = imgs.filter(
               img =>
@@ -2174,10 +3114,79 @@
             return sortOrder === 'asc' ? cmp : -cmp
           })
           return sorted
-        }, [allImages, searchTerm, sortBy, sortOrder])
+        }, [
+          allImages,
+          enableVideos,
+          filterMediaType,
+          filterSizeBand,
+          filterDateBand,
+          searchTerm,
+          sortBy,
+          sortOrder
+        ])
+
+        const activeFilterCount = useMemo(() => {
+          let count = 0
+          if (filterMediaType !== 'all') count += 1
+          if (filterSizeBand !== 'all') count += 1
+          if (filterDateBand !== 'all') count += 1
+          return count
+        }, [filterMediaType, filterSizeBand, filterDateBand])
+
+        const hasSearchOrFilter = Boolean(searchTerm) || activeFilterCount > 0
+        const collectionDecodeStats = useMemo(() => {
+          if (filteredImages.length === 0) {
+            return { count: 0, avgBytes: 0, largeCount: 0 }
+          }
+          let totalBytes = 0
+          let largeCount = 0
+          for (const media of filteredImages) {
+            const size = Number(media.size) || 0
+            totalBytes += size
+            if (size > LARGE_IMAGE_BYTES) largeCount += 1
+          }
+          return {
+            count: filteredImages.length,
+            avgBytes: totalBytes / filteredImages.length,
+            largeCount
+          }
+        }, [filteredImages])
+
+        const useAggressiveGridPreload = useMemo(() => {
+          if (!performanceMode) return false
+          const isHeavyCollection =
+            collectionDecodeStats.count >= HEAVY_COLLECTION_MIN_COUNT &&
+            (collectionDecodeStats.avgBytes >= HEAVY_COLLECTION_AVG_BYTES ||
+              collectionDecodeStats.largeCount >= Math.max(80, Math.floor(collectionDecodeStats.count * 0.12)))
+          return !isHeavyCollection
+        }, [collectionDecodeStats, performanceMode])
+        const gridBatchMultiplier = useMemo(() => {
+          if (useAggressiveGridPreload) return 5
+          if (!performanceMode) return 1
+          return collectionDecodeStats.count >= HEAVY_COLLECTION_MIN_COUNT ? 1 : 2
+        }, [useAggressiveGridPreload, performanceMode, collectionDecodeStats.count])
 
         const loadedCount = displayedImages.length
         const hasMore = loadedCount < filteredImages.length
+        const hasVideosInCurrentDir = useMemo(
+          () => allImages.some(isVideoMedia),
+          [allImages]
+        )
+        const videosHiddenBySettings =
+          !enableVideos &&
+          !hasSearchOrFilter &&
+          hasVideosInCurrentDir &&
+          filteredImages.length === 0
+        const preloadImageIfNeeded = useCallback(media => {
+          if (!isImageMedia(media)) return
+          if ((Number(media.size) || 0) > LARGE_IMAGE_BYTES) return
+          requestImageThumbnail(media, 'low').then(thumbUrl => {
+            if (!thumbUrl) return
+            const img = new Image()
+            img.decoding = 'async'
+            img.src = thumbUrl
+          })
+        }, [])
 
         useEffect(() => {
           localStorage.setItem('theme', theme)
@@ -2190,6 +3199,30 @@
         useEffect(() => {
           localStorage.setItem('sortOrder', sortOrder)
         }, [sortOrder])
+
+        useEffect(() => {
+          localStorage.setItem('filterMediaType', filterMediaType)
+        }, [filterMediaType])
+
+        useEffect(() => {
+          localStorage.setItem('filterSizeBand', filterSizeBand)
+        }, [filterSizeBand])
+
+        useEffect(() => {
+          localStorage.setItem('filterDateBand', filterDateBand)
+        }, [filterDateBand])
+
+        useEffect(() => {
+          localStorage.setItem('showFilterPanel', showFilterPanel.toString())
+        }, [showFilterPanel])
+
+        useEffect(() => {
+          localStorage.setItem('showAppMenu', showAppMenu.toString())
+        }, [showAppMenu])
+
+        useEffect(() => {
+          localStorage.setItem('menuOrbPosition', JSON.stringify(menuOrbPosition))
+        }, [menuOrbPosition])
 
         useEffect(() => {
           localStorage.setItem('columnCount', columnCount.toString())
@@ -2214,6 +3247,16 @@
         useEffect(() => {
           localStorage.setItem('showActionFeedback', showActionFeedback.toString())
         }, [showActionFeedback])
+
+        useEffect(() => {
+          localStorage.setItem('enableVideos', enableVideos.toString())
+        }, [enableVideos])
+
+        useEffect(() => {
+          if (selectedImage && !enableVideos && isVideoMedia(selectedImage)) {
+            setSelectedImage(null)
+          }
+        }, [selectedImage, enableVideos])
 
         useEffect(() => {
           localStorage.setItem('maxImageSize', maxImageSize.toString())
@@ -2266,6 +3309,33 @@
         useEffect(() => {
           localStorage.setItem('activeTabId', activeTabId.toString())
         }, [activeTabId])
+
+        // Warm thumbnail cache in the background for smoother reopen/scroll.
+        useEffect(() => {
+          if (!selectedDir || allImages.length === 0) return
+          let cancelled = false
+          const candidates = allImages.filter(isImageMedia).slice(0, 120)
+          if (candidates.length === 0) return
+
+          let idx = 0
+          const warmChunk = () => {
+            if (cancelled) return
+            const chunkEnd = Math.min(idx + 4, candidates.length)
+            for (let i = idx; i < chunkEnd; i++) {
+              requestImageThumbnail(candidates[i], 'low')
+            }
+            idx = chunkEnd
+            if (idx < candidates.length) {
+              setTimeout(warmChunk, 80)
+            }
+          }
+
+          const starter = setTimeout(warmChunk, 4000)
+          return () => {
+            cancelled = true
+            clearTimeout(starter)
+          }
+        }, [selectedDir, allImages])
 
         useEffect(() => {
           const fetchFavoritesDir = async () => {
@@ -2352,10 +3422,26 @@
         // Global keyboard shortcuts for main window
         useEffect(() => {
           const handleGlobalKeyPress = e => {
-            // Don't trigger if modal is open or typing in input
-            if (selectedImage || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
-
             const key = e.key
+            if ((e.ctrlKey || e.metaKey) && key.toLowerCase() === 'k') {
+              if (selectedImage) return
+              e.preventDefault()
+              setShowCommandPalette(true)
+              setCommandQuery('')
+              setCommandSelectionIndex(0)
+              return
+            }
+
+            // Don't trigger if modal/palette is open or typing in input
+            if (
+              showCommandPalette ||
+              selectedImage ||
+              e.target.tagName === 'INPUT' ||
+              e.target.tagName === 'TEXTAREA'
+            ) {
+              return
+            }
+
             if ((e.ctrlKey || e.metaKey) && key === keybindings.openDirectory) { e.preventDefault(); handleDirSelect() }
             else if ((e.ctrlKey || e.metaKey) && key === keybindings.newTab) {
               e.preventDefault()
@@ -2373,7 +3459,10 @@
             }
             else if (key === keybindings.viewFavorites || key === 'F') { viewFavorites() }
             else if (key === keybindings.toggleDeleteMode) { setDeleteMode(d => !d) }
-            else if (key === keybindings.toggleDarkMode || key === 'M') { setDarkMode(d => !d) }
+            else if (key === keybindings.toggleDarkMode || key === 'M') {
+              setTheme(prevTheme => (DARK_THEME_KEYS.has(prevTheme) ? 'sakura' : 'midnight'))
+            }
+            else if (key === keybindings.toggleAppMenu) { setShowAppMenu(v => !v) }
             else if (key === keybindings.openSettings) { setShowSettings(true) }
             else if (key === keybindings.openHelp) { setShowHelp(true) }
             else if (key === keybindings.toggleHistoryPanel || key === 'H') { setShowHistoryPanel(v => !v) }
@@ -2381,25 +3470,33 @@
           }
           document.addEventListener('keydown', handleGlobalKeyPress)
           return () => document.removeEventListener('keydown', handleGlobalKeyPress)
-        }, [selectedImage, keybindings, handleDirSelect, viewFavorites, tabs, activeTabId])
+        }, [
+          activeTabId,
+          filteredImages.length,
+          handleDirSelect,
+          keybindings,
+          selectedImage,
+          showCommandPalette,
+          tabs,
+          viewFavorites
+        ])
 
         useEffect(() => {
-          // Performance mode: load much larger initial batch (5x)
-          const initialBatch = performanceMode ? BATCH_SIZE * 5 : BATCH_SIZE
+          // For very large/high-resolution collections, reduce eager decode pressure.
+          const initialBatch = BATCH_SIZE * gridBatchMultiplier
           setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, displayedImages: filteredImages.slice(0, initialBatch) } : t))
           if (scrollContainerRef.current) {
             scrollContainerRef.current.scrollTop = 0
           }
-          // Performance mode: aggressively preload multiple batches ahead
-          if (performanceMode && filteredImages.length > initialBatch) {
+          // Aggressive preloading is only safe for lighter collections.
+          if (useAggressiveGridPreload && filteredImages.length > initialBatch) {
             // Preload next 3 batches (300 images) in background
             const preloadEnd = Math.min(initialBatch + BATCH_SIZE * 15, filteredImages.length)
             let preloadIndex = initialBatch
             const preloadChunk = () => {
               const chunkEnd = Math.min(preloadIndex + 20, preloadEnd)
               for (let i = preloadIndex; i < chunkEnd; i++) {
-                const img = new Image()
-                img.src = `local-image://${encodeURIComponent(filteredImages[i].fullPath)}`
+                preloadImageIfNeeded(filteredImages[i])
               }
               preloadIndex = chunkEnd
               if (preloadIndex < preloadEnd) {
@@ -2408,14 +3505,13 @@
             }
             preloadChunk()
           }
-        }, [filteredImages, activeTabId, performanceMode])
+        }, [filteredImages, activeTabId, preloadImageIfNeeded, useAggressiveGridPreload, gridBatchMultiplier])
 
         const loadMoreImages = useCallback(() => {
           if (loadingMore || !hasMore) return
           setLoadingMore(true)
-          // Performance mode: instant loading with much larger batches (5x)
-          const batchSize = performanceMode ? BATCH_SIZE * 5 : BATCH_SIZE
-          const delay = performanceMode ? 0 : 300
+          const batchSize = BATCH_SIZE * gridBatchMultiplier
+          const delay = useAggressiveGridPreload ? 0 : 120
           setTimeout(() => {
             const nextBatch = filteredImages.slice(
               loadedCount,
@@ -2424,16 +3520,15 @@
             setTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, displayedImages: [...t.displayedImages, ...nextBatch] } : t))
             setLoadingMore(false)
 
-            // Performance mode: aggressively preload multiple batches ahead
-            if (performanceMode) {
+            // Aggressive preloading is only safe for lighter collections.
+            if (useAggressiveGridPreload) {
               const preloadStart = loadedCount + batchSize
               const preloadEnd = Math.min(preloadStart + BATCH_SIZE * 10, filteredImages.length)
               let preloadIndex = preloadStart
               const preloadChunk = () => {
                 const chunkEnd = Math.min(preloadIndex + 20, preloadEnd)
                 for (let i = preloadIndex; i < chunkEnd; i++) {
-                  const img = new Image()
-                  img.src = `local-image://${encodeURIComponent(filteredImages[i].fullPath)}`
+                  preloadImageIfNeeded(filteredImages[i])
                 }
                 preloadIndex = chunkEnd
                 if (preloadIndex < preloadEnd) {
@@ -2443,15 +3538,23 @@
               if (preloadStart < filteredImages.length) preloadChunk()
             }
           }, delay)
-        }, [filteredImages, loadedCount, loadingMore, hasMore, activeTabId, performanceMode])
+        }, [
+          filteredImages,
+          loadedCount,
+          loadingMore,
+          hasMore,
+          activeTabId,
+          preloadImageIfNeeded,
+          useAggressiveGridPreload,
+          gridBatchMultiplier
+        ])
 
         useEffect(() => {
           const scrollContainer = scrollContainerRef.current
           if (!scrollContainer || !hasMore) return
 
           // IntersectionObserver for infinite scroll
-          // Performance mode: very large rootMargin for much earlier preloading
-          const rootMargin = performanceMode ? '3000px' : '600px'
+          const rootMargin = useAggressiveGridPreload ? '2200px' : performanceMode ? '900px' : '600px'
           const observer = new IntersectionObserver(
             entries => {
               const [entry] = entries
@@ -2468,8 +3571,7 @@
           }
 
           // Fallback scroll handler for cases where IntersectionObserver doesn't trigger
-          // Performance mode: trigger much earlier
-          const scrollThreshold = performanceMode ? 3000 : 800
+          const scrollThreshold = useAggressiveGridPreload ? 2200 : performanceMode ? 1200 : 800
           const handleScroll = () => {
             if (loadingMore || !hasMore) return
             const { scrollTop, scrollHeight, clientHeight } = scrollContainer
@@ -2486,12 +3588,12 @@
             }
             scrollContainer.removeEventListener('scroll', handleScroll)
           }
-        }, [loadMoreImages, hasMore, loadingMore, selectedDir, displayedImages.length, performanceMode])
+        }, [loadMoreImages, hasMore, loadingMore, selectedDir, displayedImages.length, performanceMode, useAggressiveGridPreload])
 
         // Performance mode: continuous scroll-based preloader
         // Preloads images ahead of current scroll position
         useEffect(() => {
-          if (!performanceMode) return
+          if (!useAggressiveGridPreload) return
           const scrollContainer = scrollContainerRef.current
           if (!scrollContainer || filteredImages.length === 0) return
 
@@ -2507,8 +3609,7 @@
 
             if (preloadTarget > preloadedUpTo) {
               for (let i = preloadedUpTo; i < preloadTarget; i++) {
-                const img = new Image()
-                img.src = `local-image://${encodeURIComponent(filteredImages[i].fullPath)}`
+                preloadImageIfNeeded(filteredImages[i])
               }
               preloadedUpTo = preloadTarget
             }
@@ -2532,7 +3633,7 @@
             scrollContainer.removeEventListener('scroll', handleScrollPreload)
             if (scrollTimeout) clearTimeout(scrollTimeout)
           }
-        }, [performanceMode, filteredImages, columnCount])
+        }, [useAggressiveGridPreload, filteredImages, columnCount, preloadImageIfNeeded])
 
         const handleBatchDelete = useCallback(
           async pathsToDelete => {
@@ -2572,7 +3673,6 @@
                 await window.electronAPI.unstarImage(result.starredPath)
               }
             }
-            setStarVersion(v => v + 1)
           } catch (error) {
             console.error('Failed to star image:', error)
             alert(t('prompts.error') + ': ' + error.message)
@@ -2653,19 +3753,304 @@
           setIsDragOver(false)
         }, [])
 
+        const clampMenuOrbPosition = useCallback((x, y, margin = 44) => {
+          const w = typeof window !== 'undefined' ? window.innerWidth : 1920
+          const h = typeof window !== 'undefined' ? window.innerHeight : 1080
+          const clampedX = Math.min(Math.max(margin, x), Math.max(margin, w - margin))
+          const clampedY = Math.min(Math.max(margin, y), Math.max(margin, h - margin))
+          return { x: clampedX, y: clampedY }
+        }, [])
+
+        const getMenuOrbActionOffset = useCallback((index, total) => {
+          if (total <= 0) return { x: 0, y: 0 }
+          const innerCount = Math.min(8, total)
+          const outerCount = Math.max(0, total - innerCount)
+          const fullCircle = Math.PI * 2
+          if (index < innerCount) {
+            const angle = -Math.PI / 2 + (fullCircle * index) / innerCount
+            const radius = 108
+            return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
+          }
+          const outerIndex = index - innerCount
+          const angle = -Math.PI / 2 + (fullCircle * outerIndex) / Math.max(1, outerCount)
+          const radius = 172
+          return { x: Math.cos(angle) * radius, y: Math.sin(angle) * radius }
+        }, [])
+
+        const handleMenuOrbMouseDown = useCallback(e => {
+          if (e.button !== 0) return
+          e.preventDefault()
+          e.stopPropagation()
+          setMenuOrbExpanded(false)
+          menuOrbDragRef.current = {
+            dragging: true,
+            moved: false,
+            startX: e.clientX,
+            startY: e.clientY,
+            originX: menuOrbPosition.x,
+            originY: menuOrbPosition.y
+          }
+        }, [menuOrbPosition.x, menuOrbPosition.y])
+
+        const clearFilters = useCallback(() => {
+          setFilterMediaType('all')
+          setFilterSizeBand('all')
+          setFilterDateBand('all')
+        }, [])
+
+        const toggleAppMenu = useCallback(() => {
+          setShowAppMenu(v => !v)
+        }, [])
+
+        useEffect(() => {
+          const handleDragMove = e => {
+            const state = menuOrbDragRef.current
+            if (!state.dragging) return
+            const dx = e.clientX - state.startX
+            const dy = e.clientY - state.startY
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+              state.moved = true
+            }
+            const next = clampMenuOrbPosition(state.originX + dx, state.originY + dy)
+            setMenuOrbPosition(next)
+          }
+          const handleDragEnd = () => {
+            const state = menuOrbDragRef.current
+            if (!state.dragging) return
+            const wasMoved = state.moved
+            menuOrbDragRef.current.dragging = false
+            menuOrbDragRef.current.moved = false
+            if (!wasMoved) {
+              setMenuOrbPosition(prev => clampMenuOrbPosition(prev.x, prev.y, 220))
+              setMenuOrbExpanded(v => !v)
+            }
+          }
+
+          window.addEventListener('mousemove', handleDragMove)
+          window.addEventListener('mouseup', handleDragEnd)
+          return () => {
+            window.removeEventListener('mousemove', handleDragMove)
+            window.removeEventListener('mouseup', handleDragEnd)
+          }
+        }, [clampMenuOrbPosition])
+
+        useEffect(() => {
+          const handleResize = () => {
+            setMenuOrbPosition(prev => clampMenuOrbPosition(prev.x, prev.y))
+          }
+          handleResize()
+          window.addEventListener('resize', handleResize)
+          return () => window.removeEventListener('resize', handleResize)
+        }, [clampMenuOrbPosition])
+
+        useEffect(() => {
+          if (showAppMenu && menuOrbExpanded) {
+            setMenuOrbExpanded(false)
+          }
+        }, [showAppMenu, menuOrbExpanded])
+
+        useEffect(() => {
+          if (showCommandPalette || selectedImage || showSettings || showHelp || showHistoryPanel || showMosaicMode) {
+            setMenuOrbExpanded(false)
+          }
+        }, [showCommandPalette, selectedImage, showSettings, showHelp, showHistoryPanel, showMosaicMode])
+
+        const toggleThemeMode = useCallback(() => {
+          setTheme(prevTheme => (DARK_THEME_KEYS.has(prevTheme) ? 'sakura' : 'midnight'))
+        }, [])
+
+        const openCommandPalette = useCallback(() => {
+          setShowCommandPalette(true)
+          setCommandQuery('')
+          setCommandSelectionIndex(0)
+        }, [])
+
+        const closeCommandPalette = useCallback(() => {
+          setShowCommandPalette(false)
+          setCommandQuery('')
+          setCommandSelectionIndex(0)
+        }, [])
+
+        const commandItems = useMemo(
+          () => [
+            { id: 'open-directory', label: t('command.openDirectory'), keywords: 'folder browse import', run: handleDirSelect },
+            { id: 'new-tab', label: t('command.newTab'), keywords: 'tab create', run: () => { const newTab = createNewTab(); setTabs(prev => [...prev, newTab]); setActiveTabId(newTab.id) } },
+            { id: 'favorites', label: t('command.openFavorites'), keywords: 'star starred', run: viewFavorites },
+            { id: 'history', label: showHistoryPanel ? t('command.hideHistoryPanel') : t('command.showHistoryPanel'), keywords: 'history recent', run: () => setShowHistoryPanel(v => !v) },
+            { id: 'mosaic', label: showMosaicMode ? t('command.closeMosaicMode') : t('command.openMosaicMode'), keywords: 'mosaic wall gallery', run: () => { if (filteredImages.length > 0) setShowMosaicMode(v => !v) } },
+            { id: 'delete-mode', label: deleteMode ? t('command.disableDeleteMode') : t('command.enableDeleteMode'), keywords: 'delete batch select', run: handleToggleDeleteMode },
+            { id: 'settings', label: t('command.openSettings'), keywords: 'preferences config', run: () => setShowSettings(true) },
+            { id: 'toggle-menu', label: showAppMenu ? t('menu.hideAppMenu') : t('menu.showAppMenu'), keywords: 'menu header toolbar filters', run: toggleAppMenu },
+            { id: 'help', label: t('command.openKeyboardHelp'), keywords: 'help shortcuts', run: () => setShowHelp(true) },
+            { id: 'theme', label: t('command.toggleTheme'), keywords: 'theme dark light', run: toggleThemeMode },
+            { id: 'show-filters', label: showFilterPanel ? t('command.hideFilters') : t('command.showFilters'), keywords: 'filter panel', run: () => setShowFilterPanel(v => !v) },
+            { id: 'clear-filters', label: t('command.clearFilters'), keywords: 'filter reset clear', run: clearFilters },
+            { id: 'filter-all', label: t('command.filterAllMedia'), keywords: 'filter media all', run: () => { setShowFilterPanel(true); setFilterMediaType('all') } },
+            { id: 'filter-images', label: t('command.filterImagesOnly'), keywords: 'filter media image photo', run: () => { setShowFilterPanel(true); setFilterMediaType('images') } },
+            { id: 'filter-videos', label: t('command.filterVideosOnly'), keywords: 'filter media video movie', run: () => { setEnableVideos(true); setShowFilterPanel(true); setFilterMediaType('videos') } },
+            { id: 'filter-date-7d', label: t('command.filterLast7Days'), keywords: 'filter date recent week', run: () => { setShowFilterPanel(true); setFilterDateBand('7d') } },
+            { id: 'filter-size-large', label: t('command.filterLargeFiles'), keywords: 'filter size large', run: () => { setShowFilterPanel(true); setFilterSizeBand('large') } }
+          ],
+          [
+            clearFilters,
+            deleteMode,
+            filteredImages.length,
+            handleDirSelect,
+            handleToggleDeleteMode,
+            showAppMenu,
+            showFilterPanel,
+            showHistoryPanel,
+            showMosaicMode,
+            t,
+            toggleAppMenu,
+            toggleThemeMode,
+            viewFavorites
+          ]
+        )
+
+        const filteredCommandItems = useMemo(() => {
+          const query = commandQuery.trim().toLowerCase()
+          if (!query) return commandItems
+          return commandItems.filter(item => {
+            const haystack = `${item.label} ${item.keywords}`.toLowerCase()
+            return haystack.includes(query)
+          })
+        }, [commandItems, commandQuery])
+
+        const runCommand = useCallback(
+          item => {
+            if (!item) return
+            item.run()
+            closeCommandPalette()
+          },
+          [closeCommandPalette]
+        )
+
+        useEffect(() => {
+          if (!showCommandPalette) return
+          const timer = setTimeout(() => commandInputRef.current?.focus(), 0)
+          return () => clearTimeout(timer)
+        }, [showCommandPalette])
+
+        useEffect(() => {
+          if (selectedImage && showCommandPalette) {
+            closeCommandPalette()
+          }
+        }, [selectedImage, showCommandPalette, closeCommandPalette])
+
+        useEffect(() => {
+          if (!showCommandPalette) return
+          const handlePaletteKeys = e => {
+            if (e.key === 'Escape') {
+              e.preventDefault()
+              closeCommandPalette()
+              return
+            }
+            if (e.key === 'ArrowDown') {
+              e.preventDefault()
+              setCommandSelectionIndex(i => {
+                if (filteredCommandItems.length === 0) return 0
+                return (i + 1) % filteredCommandItems.length
+              })
+              return
+            }
+            if (e.key === 'ArrowUp') {
+              e.preventDefault()
+              setCommandSelectionIndex(i => {
+                if (filteredCommandItems.length === 0) return 0
+                return (i - 1 + filteredCommandItems.length) % filteredCommandItems.length
+              })
+              return
+            }
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              runCommand(filteredCommandItems[commandSelectionIndex] || filteredCommandItems[0])
+            }
+          }
+          document.addEventListener('keydown', handlePaletteKeys)
+          return () => document.removeEventListener('keydown', handlePaletteKeys)
+        }, [
+          closeCommandPalette,
+          commandSelectionIndex,
+          filteredCommandItems,
+          runCommand,
+          showCommandPalette
+        ])
+
+        useEffect(() => {
+          setCommandSelectionIndex(0)
+        }, [commandQuery, showCommandPalette])
+
         return (
           <div
             ref={scrollContainerRef}
-            className={`app-container transition-colors duration-300 ${currentTheme.bg} ${currentTheme.text} ${isDragOver ? 'ring-4 ring-inset ring-blue-500' : ''}`}
+            className={`app-container hana-shell transition-colors duration-300 ${currentTheme.bg} ${currentTheme.text} ${isDragOver ? 'ring-4 ring-inset ring-blue-500' : ''}`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
+            {!showAppMenu && !selectedImage && !showCommandPalette && !showMosaicMode && !showSettings && !showHelp && !showHistoryPanel && (
+              <>
+                {menuOrbExpanded && (
+                  <div
+                    className="fixed inset-0 z-[62]"
+                    onClick={() => setMenuOrbExpanded(false)}
+                  />
+                )}
+                <div
+                  className="fixed z-[63]"
+                  style={{
+                    left: `${menuOrbPosition.x}px`,
+                    top: `${menuOrbPosition.y}px`,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                >
+                  <div className={`menu-orb-dock ${menuOrbExpanded ? 'menu-orb-expanded' : ''}`}>
+                    <div className="menu-orb-radial" />
+                  {menuOrbExpanded && commandItems.map((item, idx) => {
+                    const offset = getMenuOrbActionOffset(idx, commandItems.length)
+                    return (
+                      <button
+                        key={`orb-${item.id}`}
+                        className="menu-orb-action z-[64]"
+                        style={{
+                          left: '50%',
+                          top: '50%',
+                          transform: `translate(-50%, -50%) translate(${offset.x}px, ${offset.y}px)`,
+                          animationDelay: `${Math.min(idx * 16, 220)}ms`
+                        }}
+                        onClick={() => {
+                          setMenuOrbExpanded(false)
+                          runCommand(item)
+                        }}
+                        title={item.label}
+                      >
+                        <span className="menu-orb-action-content">
+                          <span className="menu-orb-action-index">{idx + 1}</span>
+                          <span className="menu-orb-action-label">{item.label}</span>
+                        </span>
+                      </button>
+                    )
+                  })}
+                  <button
+                    className="menu-orb-core z-[65]"
+                    onMouseDown={handleMenuOrbMouseDown}
+                    onContextMenu={e => e.preventDefault()}
+                    title={t('menu.dragOrClickMenuOrb')}
+                  >
+                    <span className="menu-orb-core-icon">{menuOrbExpanded ? '✕' : '☰'}</span>
+                    <span className="menu-orb-core-key">{formatKey(keybindings.toggleAppMenu)}</span>
+                  </button>
+                  </div>
+                </div>
+              </>
+            )}
+            {showAppMenu && (
             <header
-              className={`sticky top-0 z-40 border-b backdrop-blur-sm transition-colors ${currentTheme.header} ${currentTheme.border}`}
+              className={`sticky top-0 z-40 border-b backdrop-blur-sm transition-colors hana-header ${currentTheme.header} ${currentTheme.border}`}
             >
               {/* Tab Bar */}
-              <div className={`flex items-center gap-1 px-2 pt-2 border-b ${currentTheme.border}`}>
+              <div className={`flex items-center gap-1 px-2 pt-2 border-b hana-tab-strip ${currentTheme.border}`}>
                 {tabs.map(tab => (
                   <div
                     key={tab.id}
@@ -2708,7 +4093,7 @@
                   +
                 </button>
               </div>
-              <div className="max-w-7xl mx-auto px-4 py-4">
+              <div className="max-w-7xl mx-auto px-4 py-4 hana-toolbar">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <h1 className={`text-2xl font-bold bg-gradient-to-r ${currentTheme.gradient} bg-clip-text text-transparent`}>
                     {t('app.title')}
@@ -2777,6 +4162,13 @@
                       </button>
                     )}
                     <button
+                      onClick={openCommandPalette}
+                      className={`px-3 py-2 rounded-lg transition-all text-sm font-semibold ${currentTheme.button}`}
+                      title={`${t('command.openPalette')} (Ctrl/Cmd+K)`}
+                    >
+                      ⌘K
+                    </button>
+                    <button
                       onClick={() => setShowHelp(true)}
                       className={`p-2 rounded-lg transition-all ${currentTheme.button}`}
                       title={t('help.title')}
@@ -2793,72 +4185,136 @@
                   </div>
                 </div>
                 {allImages.length > 0 && (
-                  <div className="mt-4 flex items-center justify-between gap-4 flex-wrap">
-                    <div className="flex-1 max-w-md">
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                          🔍
-                        </span>
-                        <input
-                          type="text"
-                          placeholder={t('images.searchPlaceholder')}
-                          value={searchTerm}
-                          onChange={e => updateActiveTab({ searchTerm: e.target.value })}
-                          className={`w-full pl-10 pr-4 py-2 rounded-lg border transition-colors ${currentTheme.input} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                        />
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      <div className="flex-1 max-w-md">
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                            🔍
+                          </span>
+                          <input
+                            type="text"
+                            placeholder={t('images.searchPlaceholder')}
+                            value={searchTerm}
+                            onChange={e => updateActiveTab({ searchTerm: e.target.value })}
+                            className={`w-full pl-10 pr-4 py-2 rounded-lg border transition-colors ${currentTheme.input} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className={`flex items-center rounded-lg border overflow-hidden ${currentTheme.border}`}>
-                        <select
-                          value={sortBy}
-                          onChange={e => setSortBy(e.target.value)}
-                          className={`px-3 py-2 border-none transition-colors ${currentTheme.bgSecondary} ${currentTheme.text}`}
-                        >
-                          <option value="name">{t('sort.name')}</option>
-                          <option value="date">{t('sort.date')}</option>
-                          <option value="size">{t('sort.size')}</option>
-                        </select>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className={`flex items-center rounded-lg border overflow-hidden ${currentTheme.border}`}>
+                          <select
+                            value={sortBy}
+                            onChange={e => setSortBy(e.target.value)}
+                            className={`px-3 py-2 border-none transition-colors ${currentTheme.bgSecondary} ${currentTheme.text}`}
+                          >
+                            <option value="name">{t('sort.name')}</option>
+                            <option value="date">{t('sort.date')}</option>
+                            <option value="size">{t('sort.size')}</option>
+                          </select>
+                          <button
+                            onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
+                            className={`px-3 py-2 border-l transition-colors ${currentTheme.bgSecondary} ${currentTheme.border} ${currentTheme.text}`}
+                            title={sortOrder === 'asc' ? t('sort.ascending') : t('sort.descending')}
+                          >
+                            {sortBy === 'name'
+                              ? (sortOrder === 'asc' ? 'A→Z' : 'Z→A')
+                              : sortBy === 'date'
+                              ? (sortOrder === 'asc' ? '🕐↓' : '🕐↑')
+                              : (sortOrder === 'asc' ? 'L→S' : 'S→L')}
+                          </button>
+                        </div>
+                        <div className={`flex items-center gap-1 px-2 py-1 rounded-lg border ${currentTheme.border}`}>
+                          <button
+                            onClick={() => setColumnCount(c => Math.max(2, c - 1))}
+                            className={`px-2 py-1 rounded ${currentTheme.button}`}
+                            disabled={columnCount <= 2}
+                          >-</button>
+                          <span className="px-2 text-sm">{columnCount} {t('sort.columns')}</span>
+                          <button
+                            onClick={() => setColumnCount(c => Math.min(8, c + 1))}
+                            className={`px-2 py-1 rounded ${currentTheme.button}`}
+                            disabled={columnCount >= 8}
+                          >+</button>
+                        </div>
                         <button
-                          onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
-                          className={`px-3 py-2 border-l transition-colors ${currentTheme.bgSecondary} ${currentTheme.border} ${currentTheme.text}`}
-                          title={sortOrder === 'asc' ? t('sort.ascending') : t('sort.descending')}
+                          onClick={() => setShowStarButton(s => !s)}
+                          className={`px-2 py-2 rounded-lg border transition-colors ${
+                            showStarButton ? 'bg-amber-500 border-amber-500 text-white' : `${currentTheme.bgSecondary} ${currentTheme.border} ${currentTheme.textSecondary}`
+                          }`}
+                          title={showStarButton ? t('star.hideQuickStar') : t('star.showQuickStar')}
                         >
-                          {sortBy === 'name'
-                            ? (sortOrder === 'asc' ? 'A→Z' : 'Z→A')
-                            : sortBy === 'date'
-                            ? (sortOrder === 'asc' ? '🕐↓' : '🕐↑')
-                            : (sortOrder === 'asc' ? 'L→S' : 'S→L')}
+                          ⭐
+                        </button>
+                        <button
+                          onClick={() => setShowFilterPanel(v => !v)}
+                          className={`px-3 py-2 rounded-lg border transition-colors ${
+                            showFilterPanel ? `${currentTheme.accent} text-white border-transparent` : `${currentTheme.bgSecondary} ${currentTheme.border} ${currentTheme.textSecondary}`
+                          }`}
+                          title="Filter options"
+                        >
+                          🎛️ Filters{activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
                         </button>
                       </div>
-                      <div className={`flex items-center gap-1 px-2 py-1 rounded-lg border ${currentTheme.border}`}>
-                        <button
-                          onClick={() => setColumnCount(c => Math.max(2, c - 1))}
-                          className={`px-2 py-1 rounded ${currentTheme.button}`}
-                          disabled={columnCount <= 2}
-                        >-</button>
-                        <span className="px-2 text-sm">{columnCount} {t('sort.columns')}</span>
-                        <button
-                          onClick={() => setColumnCount(c => Math.min(8, c + 1))}
-                          className={`px-2 py-1 rounded ${currentTheme.button}`}
-                          disabled={columnCount >= 8}
-                        >+</button>
-                      </div>
-                      <button
-                        onClick={() => setShowStarButton(s => !s)}
-                        className={`px-2 py-2 rounded-lg border transition-colors ${
-                          showStarButton ? 'bg-amber-500 border-amber-500 text-white' : `${currentTheme.bgSecondary} ${currentTheme.border} ${currentTheme.textSecondary}`
-                        }`}
-                        title={showStarButton ? t('star.hideQuickStar') : t('star.showQuickStar')}
-                      >
-                        ⭐
-                      </button>
+                      <div className={`text-sm ${currentTheme.textSecondary} whitespace-nowrap`}>{t('images.showingOf', { shown: displayedImages.length, total: filteredImages.length })}</div>
                     </div>
-                    <div className={`text-sm ${currentTheme.textSecondary} whitespace-nowrap`}>{t('images.showingOf', { shown: displayedImages.length, total: filteredImages.length })}</div>
+                    {performanceMode && !useAggressiveGridPreload && (
+                      <div className={`text-xs ${currentTheme.textSecondary}`}>
+                        Large files detected. Using adaptive loading to reduce decode stalls.
+                      </div>
+                    )}
+                    {showFilterPanel && (
+                      <div className={`flex items-center gap-2 flex-wrap p-3 rounded-lg border ${currentTheme.border} ${currentTheme.bgSecondary}`}>
+                        <span className={`text-sm ${currentTheme.textSecondary}`}>Filter:</span>
+                        <select
+                          value={filterMediaType}
+                          onChange={e => {
+                            const value = e.target.value
+                            if (value === 'videos' && !enableVideos) {
+                              setEnableVideos(true)
+                            }
+                            setFilterMediaType(value)
+                          }}
+                          className={`px-3 py-1.5 rounded border ${currentTheme.input}`}
+                        >
+                          <option value="all">All media</option>
+                          <option value="images">Images only</option>
+                          <option value="videos">Videos only</option>
+                        </select>
+                        <select
+                          value={filterSizeBand}
+                          onChange={e => setFilterSizeBand(e.target.value)}
+                          className={`px-3 py-1.5 rounded border ${currentTheme.input}`}
+                        >
+                          <option value="all">Any size</option>
+                          <option value="small">Small (&lt; 2 MB)</option>
+                          <option value="medium">Medium (2-10 MB)</option>
+                          <option value="large">Large (&gt; 10 MB)</option>
+                        </select>
+                        <select
+                          value={filterDateBand}
+                          onChange={e => setFilterDateBand(e.target.value)}
+                          className={`px-3 py-1.5 rounded border ${currentTheme.input}`}
+                        >
+                          <option value="all">Any date</option>
+                          <option value="24h">Last 24 hours</option>
+                          <option value="7d">Last 7 days</option>
+                          <option value="30d">Last 30 days</option>
+                        </select>
+                        <button
+                          onClick={clearFilters}
+                          disabled={activeFilterCount === 0}
+                          className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${currentTheme.button} disabled:opacity-40`}
+                        >
+                          Clear filters
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </header>
+            )}
             {showHistoryPanel && (
               <div className="fixed inset-0 z-50" onClick={() => setShowHistoryPanel(false)}>
                 <div
@@ -3000,12 +4456,16 @@
                 </div>
               ) : displayedImages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <div className="text-8xl mb-6">🔍</div>
+                  <div className="text-8xl mb-6">{videosHiddenBySettings ? '🎬' : '🔍'}</div>
                   <h2 className="text-2xl font-medium mb-3">
-                    {t('images.noMatchesFound')}
+                    {videosHiddenBySettings ? t('images.videosHiddenBySettings') : t('images.noMatchesFound')}
                   </h2>
                   <p className={currentTheme.textSecondary}>
-                    {t('images.tryAdjustingSearch')}
+                    {videosHiddenBySettings
+                      ? t('images.enableVideosHint')
+                      : hasSearchOrFilter
+                      ? 'Try adjusting your search or filters.'
+                      : t('images.tryAdjustingSearch')}
                   </p>
                 </div>
               ) : (
@@ -3024,8 +4484,7 @@
                   columnCount={columnCount}
                   showStarButton={showStarButton}
                   onContextMenu={handleMainContextMenu}
-                  starVersion={starVersion}
-                  retainImages={performanceMode || retainImages}
+                  retainImages={useAggressiveGridPreload || retainImages}
                 />
               )}
             </main>
@@ -3092,16 +4551,63 @@
                 >
                   <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { setSelectedImage(mainContextMenu.image); closeMainContextMenu() }}>{t('contextMenu.viewImage')}</button>
                   <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { openFileLocation(mainContextMenu.image); closeMainContextMenu() }}>{t('contextMenu.openLocation')}</button>
-                  <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={async () => { await window.electronAPI.copyImageToClipboard(mainContextMenu.image.fullPath); if (showActionFeedback) alert(t('prompts.copied')); closeMainContextMenu() }}>{t('viewer.copyToClipboard')}</button>
+                  {isImageMedia(mainContextMenu.image) && (
+                    <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={async () => { await window.electronAPI.copyImageToClipboard(mainContextMenu.image.fullPath); if (showActionFeedback) alert(t('prompts.copied')); closeMainContextMenu() }}>{t('viewer.copyToClipboard')}</button>
+                  )}
                   <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { handleStarImage(mainContextMenu.image); closeMainContextMenu() }}>{t('star.starUnstar')}</button>
                   <div className="border-t border-white/20 my-1"></div>
                   <button className="w-full px-4 py-2 text-left text-white hover:bg-white/10 text-sm transition-colors" onClick={() => { handleBatchDelete([mainContextMenu.image.fullPath]); closeMainContextMenu() }}>{t('actions.delete')}</button>
                 </div>
               </div>
             )}
+            {showCommandPalette && (
+              <div
+                className="fixed inset-0 z-[70] bg-black/70 backdrop-blur-sm flex items-start justify-center p-4 pt-24 hana-command-overlay"
+                onClick={closeCommandPalette}
+              >
+                <div
+                  className={`w-full max-w-2xl rounded-xl border shadow-2xl hana-command-panel ${currentTheme.bgSecondary} ${currentTheme.border}`}
+                  onClick={e => e.stopPropagation()}
+                >
+                  <div className={`px-4 py-3 border-b ${currentTheme.border}`}>
+                    <input
+                      ref={commandInputRef}
+                      type="text"
+                      value={commandQuery}
+                      onChange={e => setCommandQuery(e.target.value)}
+                      placeholder={t('command.typePlaceholder')}
+                      className={`w-full px-3 py-2 rounded-lg border ${currentTheme.input} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    />
+                    <div className={`mt-2 text-xs ${currentTheme.textSecondary}`}>
+                      {t('command.hint')}
+                    </div>
+                  </div>
+                  <div className="max-h-80 overflow-y-auto p-2">
+                    {filteredCommandItems.length === 0 ? (
+                      <div className={`px-3 py-6 text-center text-sm ${currentTheme.textSecondary}`}>
+                        {t('command.noMatches')}
+                      </div>
+                    ) : (
+                      filteredCommandItems.map((item, idx) => (
+                        <button
+                          key={item.id}
+                          onClick={() => runCommand(item)}
+                          onMouseEnter={() => setCommandSelectionIndex(idx)}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                            idx === commandSelectionIndex ? `${currentTheme.accent} text-white` : `${currentTheme.text} hover:bg-white/10`
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             {showHelp && (
               <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50" onClick={() => setShowHelp(false)}>
-                <div className={`p-6 rounded-xl max-w-2xl max-h-[80vh] overflow-y-auto ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`} onClick={e => e.stopPropagation()}>
+                <div className={`p-6 rounded-xl max-w-2xl max-h-[80vh] overflow-y-auto ${currentTheme.bgSecondary} ${currentTheme.text}`} onClick={e => e.stopPropagation()}>
                   <h2 className="text-xl font-bold mb-4">{t('help.title')}</h2>
 
                   <h3 className="text-md font-semibold mb-2 text-blue-400">{t('help.imageViewer')}</h3>
@@ -3129,8 +4635,10 @@
                     <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">{formatKey(keybindings.toggleDeleteMode)}</kbd> {t('deleteMode.selectToDelete')}</p>
                     <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">{formatKey(keybindings.toggleDarkMode)}</kbd> {t('darkMode.toggle')}</p>
                     <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">{formatKey(keybindings.toggleHistoryPanel)}</kbd> {t('navigation.historyAndRecent')}</p>
+                    <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">{formatKey(keybindings.toggleAppMenu)}</kbd> {t('menu.toggleAppMenu')}</p>
                     <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">{formatKey(keybindings.toggleMosaicMode)}</kbd> {t('mosaic.title')}</p>
                     <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">{formatKey(keybindings.openSettings)}</kbd> {t('settings.title')}</p>
+                    <p><kbd className="px-2 py-1 bg-gray-600 rounded text-white">Ctrl+K</kbd> {t('command.title')}</p>
                   </div>
 
                   <h3 className="text-md font-semibold mb-2 text-yellow-400">{t('help.other')}</h3>
@@ -3157,6 +4665,8 @@
                 setConfirmPrompts={setConfirmPrompts}
                 showActionFeedback={showActionFeedback}
                 setShowActionFeedback={setShowActionFeedback}
+                enableVideos={enableVideos}
+                setEnableVideos={setEnableVideos}
                 maxImageSize={maxImageSize}
                 setMaxImageSize={setMaxImageSize}
                 keybindings={keybindings}
@@ -3199,6 +4709,8 @@
         setConfirmPrompts,
         showActionFeedback,
         setShowActionFeedback,
+        enableVideos,
+        setEnableVideos,
         maxImageSize,
         setMaxImageSize,
         keybindings,
@@ -3287,6 +4799,15 @@
                   className={`px-3 py-1 rounded ${showActionFeedback ? 'bg-emerald-500 text-white' : currentTheme.button}`}
                 >
                   {showActionFeedback ? t('settings.on') : t('settings.off')}
+                </button>
+              </div>
+              <div className={`flex items-center justify-between py-2 border-b ${currentTheme.border}`}>
+                <span>{t('settings.enableVideos')}</span>
+                <button
+                  onClick={() => setEnableVideos(v => !v)}
+                  className={`px-3 py-1 rounded ${enableVideos ? 'bg-emerald-500 text-white' : currentTheme.button}`}
+                >
+                  {enableVideos ? t('settings.on') : t('settings.off')}
                 </button>
               </div>
               <div className={`flex items-center justify-between py-2 border-b ${currentTheme.border}`}>

@@ -40,6 +40,12 @@ This started as a vibe coding project and has been iterated into a practical, hi
 - Favorites system (`Starred Images` under your Pictures directory)
 - Batch selection and recycle-bin deletion
 
+### Quick actions and menu controls
+- Command palette (`Ctrl/Cmd + K`) with localized labels and hints
+- Toggleable app menu (`U` by default), persisted across sessions
+- Draggable floating action orb when menu is hidden
+- Orb radial actions reuse the same commands as the command palette
+
 ### Viewer and editing
 - Full-screen modal viewer
 - Zoom (0.5x-5x), pan/drag mode, slideshow
@@ -124,8 +130,10 @@ All shortcuts are user-configurable in Settings.
 | Key | Action |
 | --- | --- |
 | `Ctrl/Cmd + O` | Open directory |
+| `Ctrl/Cmd + K` | Open command palette |
 | `Ctrl/Cmd + T` | New tab |
 | `Ctrl/Cmd + W` | Close tab |
+| `U` | Toggle app menu |
 | `F` | View favorites |
 | `Backspace` | Toggle delete mode |
 | `H` | Toggle history panel |
@@ -153,7 +161,7 @@ All shortcuts are user-configurable in Settings.
 
 ## Tech Stack
 
-- Electron 25
+- Electron 40
 - React 18 (CDN runtime in renderer)
 - Tailwind CSS (CDN)
 - fast-glob

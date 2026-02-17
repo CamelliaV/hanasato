@@ -36,6 +36,8 @@
     "selectDirectoryToStart": "选择一个目录以开始。",
     "noMatchesFound": "未找到匹配项",
     "tryAdjustingSearch": "尝试调整搜索词。",
+    "videosHiddenBySettings": "视频已被设置隐藏",
+    "enableVideosHint": "在设置中启用视频支持即可显示并播放视频。",
     "searchPlaceholder": "搜索图片...",
     "allImagesLoaded": "已加载全部 {count} 张图片！",
     "loadingMore": "加载更多...",
@@ -61,6 +63,8 @@
     "crop": "裁剪",
     "resize": "调整大小",
     "rename": "重命名",
+    "videoCodecNotSupported": "内置播放器暂不支持此视频编码。",
+    "openInExternalPlayer": "使用外部播放器打开",
     "modified": "修改时间",
     "of": "/",
     "showMetadata": "显示元数据",
@@ -99,6 +103,7 @@
     "clickOutsideToClose": "点击外部关闭查看器",
     "confirmationPrompts": "确认提示",
     "showActionFeedback": "显示操作反馈（提示框）",
+    "enableVideos": "启用视频支持",
     "maxImageSize": "最大图片尺寸 (vw)",
     "retainImages": "保留已加载图片（更流畅滚动）",
     "performanceMode": "性能模式（激进预加载）",
@@ -149,7 +154,8 @@
     "mosaicNextWall": "马赛克: 下一墙",
     "mosaicPrevWall": "马赛克: 上一墙",
     "mosaicResetTileScale": "马赛克: 重置瓷砖缩放",
-    "mosaicToggleDrawer": "马赛克: 切换控制面板"
+    "mosaicToggleDrawer": "马赛克: 切换控制面板",
+    "toggleAppMenu": "切换应用菜单"
   },
   "prompts": {
     "enterNewFilename": "输入新文件名：",
@@ -193,5 +199,38 @@
     "loaded": "已加载",
     "fixedGrid": "固定网格",
     "adaptiveGrid": "自适应"
+  },
+  "menu": {
+    "showAppMenu": "显示应用菜单",
+    "hideAppMenu": "隐藏应用菜单",
+    "toggleAppMenu": "切换应用菜单",
+    "dragOrClickMenuOrb": "拖动可移动，点击展开快捷操作"
+  },
+  "command": {
+    "title": "命令面板",
+    "openPalette": "打开命令面板",
+    "typePlaceholder": "输入命令...",
+    "hint": "Enter: 执行 • ↑/↓: 导航 • Esc: 关闭",
+    "noMatches": "没有匹配的命令。",
+    "openDirectory": "打开目录",
+    "newTab": "新建标签页",
+    "openFavorites": "打开收藏夹",
+    "showHistoryPanel": "显示历史面板",
+    "hideHistoryPanel": "隐藏历史面板",
+    "openMosaicMode": "打开马赛克模式",
+    "closeMosaicMode": "关闭马赛克模式",
+    "enableDeleteMode": "启用删除模式",
+    "disableDeleteMode": "禁用删除模式",
+    "openSettings": "打开设置",
+    "openKeyboardHelp": "打开快捷键帮助",
+    "toggleTheme": "切换深色/浅色主题",
+    "showFilters": "显示筛选器",
+    "hideFilters": "隐藏筛选器",
+    "clearFilters": "清除所有筛选",
+    "filterAllMedia": "筛选媒体：全部",
+    "filterImagesOnly": "筛选媒体：仅图片",
+    "filterVideosOnly": "筛选媒体：仅视频",
+    "filterLast7Days": "筛选日期：最近 7 天",
+    "filterLargeFiles": "筛选大小：大文件"
   }
 }

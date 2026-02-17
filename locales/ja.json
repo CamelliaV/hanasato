@@ -36,6 +36,8 @@
     "selectDirectoryToStart": "ディレクトリを選択して開始します。",
     "noMatchesFound": "一致するものが見つかりません",
     "tryAdjustingSearch": "検索語を調整してみてください。",
+    "videosHiddenBySettings": "設定により動画が非表示です",
+    "enableVideosHint": "設定で動画サポートを有効にすると表示・再生できます。",
     "searchPlaceholder": "画像を検索...",
     "allImagesLoaded": "全 {count} 枚の画像を読み込みました！",
     "loadingMore": "さらに読み込み中...",
@@ -61,6 +63,8 @@
     "crop": "クロップ",
     "resize": "リサイズ",
     "rename": "名前変更",
+    "videoCodecNotSupported": "この動画コーデックは内蔵プレイヤーでは再生できません。",
+    "openInExternalPlayer": "外部プレイヤーで開く",
     "modified": "更新日時",
     "of": "/",
     "showMetadata": "メタデータを表示",
@@ -99,6 +103,7 @@
     "clickOutsideToClose": "外側クリックでビューアを閉じる",
     "confirmationPrompts": "確認プロンプト",
     "showActionFeedback": "操作フィードバックを表示",
+    "enableVideos": "動画サポートを有効化",
     "maxImageSize": "最大画像サイズ (vw)",
     "retainImages": "読み込み済み画像を保持（スムーズスクロール）",
     "performanceMode": "パフォーマンスモード（積極的プリロード）",
@@ -149,7 +154,8 @@
     "mosaicNextWall": "モザイク: 次の壁",
     "mosaicPrevWall": "モザイク: 前の壁",
     "mosaicResetTileScale": "モザイク: タイル拡大リセット",
-    "mosaicToggleDrawer": "モザイク: コントロール切替"
+    "mosaicToggleDrawer": "モザイク: コントロール切替",
+    "toggleAppMenu": "アプリメニュー切替"
   },
   "prompts": {
     "enterNewFilename": "新しいファイル名を入力:",
@@ -193,5 +199,38 @@
     "loaded": "読込済",
     "fixedGrid": "固定グリッド",
     "adaptiveGrid": "アダプティブ"
+  },
+  "menu": {
+    "showAppMenu": "アプリメニューを表示",
+    "hideAppMenu": "アプリメニューを非表示",
+    "toggleAppMenu": "アプリメニューを切替",
+    "dragOrClickMenuOrb": "ドラッグで移動、クリックでクイック操作"
+  },
+  "command": {
+    "title": "コマンドパレット",
+    "openPalette": "コマンドパレットを開く",
+    "typePlaceholder": "コマンドを入力...",
+    "hint": "Enter: 実行 • ↑/↓: 移動 • Esc: 閉じる",
+    "noMatches": "一致するコマンドがありません。",
+    "openDirectory": "ディレクトリを開く",
+    "newTab": "新しいタブ",
+    "openFavorites": "お気に入りを開く",
+    "showHistoryPanel": "履歴パネルを表示",
+    "hideHistoryPanel": "履歴パネルを非表示",
+    "openMosaicMode": "モザイクモードを開く",
+    "closeMosaicMode": "モザイクモードを閉じる",
+    "enableDeleteMode": "削除モードを有効化",
+    "disableDeleteMode": "削除モードを無効化",
+    "openSettings": "設定を開く",
+    "openKeyboardHelp": "キーボードヘルプを開く",
+    "toggleTheme": "ダーク/ライトテーマを切替",
+    "showFilters": "フィルターを表示",
+    "hideFilters": "フィルターを非表示",
+    "clearFilters": "すべてのフィルターをクリア",
+    "filterAllMedia": "メディアフィルター: すべて",
+    "filterImagesOnly": "メディアフィルター: 画像のみ",
+    "filterVideosOnly": "メディアフィルター: 動画のみ",
+    "filterLast7Days": "日付フィルター: 過去7日",
+    "filterLargeFiles": "サイズフィルター: 大きいファイル"
   }
 }

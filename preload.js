@@ -10,9 +10,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   getImages: dirPath => ipcRenderer.invoke('get-images', dirPath),
+  getImageThumbnail: (filePath, maxSide) =>
+    ipcRenderer.invoke('get-image-thumbnail', filePath, maxSide),
+  getVideoInfo: filePath => ipcRenderer.invoke('get-video-info', filePath),
+  getVideoThumbnail: filePath => ipcRenderer.invoke('get-video-thumbnail', filePath),
   deleteImage: filePaths => ipcRenderer.invoke('delete-image', filePaths),
   openFileLocation: filePath =>
     ipcRenderer.invoke('open-file-location', filePath),
+  openFile: filePath =>
+    ipcRenderer.invoke('open-file', filePath),
   saveEditedImage: (originalPath, dataUrl, suffix) =>
     ipcRenderer.invoke('save-edited-image', { originalPath, dataUrl, suffix }),
   copyImageToClipboard: filePath =>
